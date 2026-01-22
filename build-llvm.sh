@@ -180,6 +180,7 @@ if [ -n "$HOST" ]; then
         if [ -z "${USE_LINKER:-}" ]; then
             USE_LINKER="mold"
         fi
+        ;;
     *)
         ;;
     esac
