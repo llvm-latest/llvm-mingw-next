@@ -173,10 +173,12 @@ else
     esac
 fi
 
-# use mold linker by default on Linux and macOS
+# use mold linker by default on Linux
 if [ -z "${USE_LINKER:-}" ]; then
-    if [ "$(uname)" = "Linux" ] || [ "$(uname)" = "Darwin" ]; then
+    if [ "$(uname)" = "Linux" ]; then
         USE_LINKER="mold"
+    # elif [ "$(uname)" = "Darwin" ]; then
+    #     USE_LINKER="mold"
     # elif [ -n "$TARGET_WINDOWS" ]; then
     #     USE_LINKER="mold"
     fi

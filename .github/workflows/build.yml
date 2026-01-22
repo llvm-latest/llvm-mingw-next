@@ -278,8 +278,8 @@ jobs:
     needs: [prepare]
     runs-on: macos-latest
     steps:
-      - name: Setup mold
-        run: brew install mold
+      # - name: Setup mold
+      #   run: brew install mold
       - name: Setup Git Retry
         run: git config --global http.retry 5
       - uses: actions/checkout@v4
@@ -311,8 +311,8 @@ jobs:
     needs: [prepare, macos-stage1, linux-profile]
     runs-on: macos-latest
     steps:
-      - name: Setup mold
-        run: brew install mold
+      # - name: Setup mold
+      #   run: brew install mold
       - name: Setup Git Retry
         run: git config --global http.retry 5
       - uses: actions/checkout@v4

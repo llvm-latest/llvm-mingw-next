@@ -8,7 +8,7 @@ __Add some missing features and improvements.__
   - Add missing `libclang-cpp.dll.a` and `libLLVM-*.dll.a` import libraries for windows at `lib` directory
 - Remove LLVM `NVPTX` target support
 - Compile with `SSE4.2` (for x86) by default
-- Use `mold` linker by default on Linux and macOS
+- Use `mold` linker by default on Linux
 
 
 LLVM MinGW
