@@ -278,9 +278,7 @@ jobs:
     needs: [prepare]
     runs-on: macos-latest
     steps:
-      - uses: MinoruSekine/setup-scoop@main
-        with:
-          apps: mold
+      # - uses: rui314/setup-mold@v1
       - name: Setup Git Retry
         run: git config --global http.retry 5
       - uses: actions/checkout@v4
@@ -312,9 +310,7 @@ jobs:
     needs: [prepare, macos-stage1, linux-profile]
     runs-on: macos-latest
     steps:
-      - uses: MinoruSekine/setup-scoop@main
-        with:
-          apps: mold
+      # - uses: rui314/setup-mold@v1
       - name: Setup Git Retry
         run: git config --global http.retry 5
       - uses: actions/checkout@v4
@@ -383,9 +379,9 @@ jobs:
             toolchain:p
             cmake:p
             ninja:p
-      - uses: MinoruSekine/setup-scoop@main
-        with:
-          apps: mold
+      # - uses: MinoruSekine/setup-scoop@main
+      #   with:
+      #     apps: mold
       - name: Setup Git Retry
         run: git config --global http.retry 5
       - uses: actions/checkout@v4

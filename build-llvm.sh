@@ -177,8 +177,8 @@ fi
 if [ -z "${USE_LINKER:-}" ]; then
     if [ "$(uname)" = "Linux" ]; then
         USE_LINKER="mold"
-    elif [ -n "$TARGET_WINDOWS" ]; then
-        USE_LINKER="mold"
+    # elif [ -n "$TARGET_WINDOWS" ]; then
+    #     USE_LINKER="mold"
     fi
 fi
 
