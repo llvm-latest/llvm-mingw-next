@@ -156,7 +156,9 @@ for i in *.dll.a lib*.a; do
 done
 for i in *.so* *.dylib* cmake; do
     case $i in
-    liblldb*|libclang-cpp*|libLLVM*)
+    libclang-cpp*|liblldb*|libLLVM*)
+        ;;
+    LLVMgold*)
         ;;
     *)
         rm -rf $i
