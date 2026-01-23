@@ -5,11 +5,11 @@ __Add some missing features and improvements.__
 
 - Support llvm/clang plugins
   - Add missing `llvm/llvm-c/clang/clang-c` headers at `include` directory
-  - Add missing `libclang-cpp.dll.a` and `libLLVM-*.dll.a` import libraries for windows at `lib` directory
+  - Add missing `libclang-cpp.dll.a` and `libLLVM-*.dll.a` import libraries for Windows at `lib` directory
 - Remove LLVM `NVPTX` target support
 - Compile with `SSE4.2` (for x86) by default
 - Use `mold` linker by default on Linux
-
+- Build LLVM gold plugin `LLVMgold.so` for Linux at `lib` directory
 
 LLVM MinGW
 ==========
