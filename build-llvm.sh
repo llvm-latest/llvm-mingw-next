@@ -186,7 +186,6 @@ fi
 
 # build LLVM gold plugin `LLVMgold.so` on Linux
 if [ "$(uname)" = "Linux" ]; then
-    sudo apt-get update && sudo apt-get install binutils-dev
     BINUTILS_INCDIR="/usr/include"
 else
     BINUTILS_INCDIR=""
