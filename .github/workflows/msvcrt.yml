@@ -107,6 +107,12 @@ jobs:
         run: |
           apt-get update -qq && apt-get install -qqy git
           git config --global http.retry 5
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{github.event_name == 'workflow_dispatch' && inputs.ref || 'master'}}
+      - name: Install Dependencies
+        run: ./install-dependencies.sh
+      - uses: rui314/setup-mold@v1
       - uses: actions/download-artifact@v4
         with:
           name: linux-${{matrix.crt}}-x86_64-toolchain
@@ -116,12 +122,6 @@ jobs:
           rm llvm-mingw-*.tar.xz
           mv llvm-mingw* /opt/llvm-mingw
           echo /opt/llvm-mingw/bin >> $GITHUB_PATH
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{github.event_name == 'workflow_dispatch' && inputs.ref || 'master'}}
-      - name: Install Dependencies
-        run: ./install-dependencies.sh
-      - uses: rui314/setup-mold@v1
       - name: Download profile
         uses: dawidd6/action-download-artifact@v10
         with:
