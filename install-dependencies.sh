@@ -2,7 +2,7 @@
 
 # Install Essential Tools
 apt-get update -qq
-apt-get install -qqy \
+apt-get install -qy -o Dpkg::Use-Pty=0 \
     wget curl software-properties-common \
     git git-lfs \
     build-essential binutils binutils-dev \
