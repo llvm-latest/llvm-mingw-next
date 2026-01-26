@@ -207,12 +207,16 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ubuntu:devel
-      # support exec i386 binaries
-      options: --privileged tonistiigi/binfmt --install all
+      options: --privileged
+    services:
+      binfmt:
+        image: tonistiigi/binfmt
+        options: --install all
     steps:
       - name: Setup Environment
         run: |
-          echo "qemu architectures: " | ls /proc/sys/fs/binfmt_misc
+          echo "bin formats:"
+          ls /proc/sys/fs/binfmt_misc
           apt-get update -qq && apt-get install -qqy git
           git config --global http.retry 5
       - uses: actions/checkout@v4
@@ -244,10 +248,7 @@ jobs:
           ./prepare-cross-toolchain-unix.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw
       - name: Test using the cross-built assembled toolchain
         run: |
-          dpkg --add-architecture i386
-          apt-get update -qq && apt-get install -y qemu-user-static \
-            libc6-i386-cross  libstdc++6-i386-cross \
-            libc6-arm64-cross libstdc++6-arm64-cross
+          apt-get update -qq && apt-get install -y qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh $(pwd)/install/llvm-mingw
       - name: Package the toolchain
