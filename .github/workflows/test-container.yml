@@ -1,0 +1,28 @@
+name: Test Container
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  linux-cross-aarch64:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:devel
+      options: --privileged
+    services:
+      binfmt:
+        image: tonistiigi/binfmt
+        options: --privileged tonistiigi/binfmt
+    steps:
+        run: |
+          echo "bin formats:"
+          ls /proc/sys/fs/binfmt_misc

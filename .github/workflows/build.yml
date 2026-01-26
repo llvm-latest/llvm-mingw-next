@@ -211,7 +211,7 @@ jobs:
     services:
       binfmt:
         image: tonistiigi/binfmt
-        options: --privileged --rm tonistiigi/binfmt --install all
+        options: --privileged tonistiigi/binfmt
     steps:
       - name: Setup Environment
         run: |

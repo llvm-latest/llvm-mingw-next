@@ -194,9 +194,6 @@ jobs:
           install: >-
             unzip
             make
-      # - uses: MinoruSekine/setup-scoop@main
-      #   with:
-      #     apps: mold
       - uses: actions/download-artifact@v4
         with:
           name: windows-${{matrix.crt}}-${{matrix.arch}}-toolchain
