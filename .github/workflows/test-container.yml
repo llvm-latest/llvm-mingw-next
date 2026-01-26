@@ -23,6 +23,7 @@ jobs:
         image: tonistiigi/binfmt
         options: --privileged tonistiigi/binfmt
     steps:
+      - name: Check qemu
         run: |
           echo "bin formats:"
           ls /proc/sys/fs/binfmt_misc
