@@ -6,6 +6,7 @@ on:
     paths-ignore:
       - '**.md'
       - '.gitignore'
+      - '.github/workflow/test-container.yml'
   pull_request:
   workflow_dispatch:
   # schedule:

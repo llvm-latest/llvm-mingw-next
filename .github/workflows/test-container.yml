@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - '**'
+    paths:
+      - '.github/workflow/test-container.yml'
   pull_request:
   workflow_dispatch:
 
@@ -25,5 +27,6 @@ jobs:
     steps:
       - name: Check qemu
         run: |
+          mount -t binfmt_misc none /proc/sys/fs/binfmt_misc
           echo "bin formats:"
           ls /proc/sys/fs/binfmt_misc
