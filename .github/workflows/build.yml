@@ -208,18 +208,16 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ubuntu:devel
-      options: --privileged
-    services:
-      binfmt:
-        image: tonistiigi/binfmt
-        options: --privileged tonistiigi/binfmt
     steps:
       - name: Setup Environment
         run: |
-          echo "bin formats:"
-          ls /proc/sys/fs/binfmt_misc
-          apt-get update -qq && apt-get install -qqy git
+          apt-get update -qq && apt-get install -qqy git docker.io
           git config --global http.retry 5
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@master
+        with:
+          image: tonistiigi/binfmt
+          cache-image: false
       - uses: actions/checkout@v4
       - name: Install Dependencies
         run: ./install-dependencies.sh
@@ -241,7 +239,7 @@ jobs:
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
         run: |
-          apt-get update -qq && apt-get install -y g++-aarch64-linux-gnu
+          apt-get update -qq && apt-get install -qy g++-aarch64-linux-gnu
           ./build-all.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --no-runtimes --host=aarch64-linux-gnu --thinlto --pgo
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
       - name: Assemble the cross-built toolchain
@@ -249,11 +247,7 @@ jobs:
           ./prepare-cross-toolchain-unix.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw
       - name: Test using the cross-built assembled toolchain
         run: |
-          mount -t binfmt_misc none /proc/sys/fs/binfmt_misc
-          echo "========== bin formats: =========="
-          ls /proc/sys/fs/binfmt_misc
-          echo "=================================="
-          apt-get update -qq && apt-get install -y qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross
+          apt-get update -qq && apt-get install -qy qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh $(pwd)/install/llvm-mingw
       - name: Package the toolchain
@@ -511,7 +505,7 @@ jobs:
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
-          apt-get update -qq && apt-get install -y libltdl-dev swig autoconf-archive
+          apt-get update -qq && apt-get install -qy libltdl-dev swig autoconf-archive
           ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-busybox --thinlto --pgo
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
           cd install
@@ -802,7 +796,7 @@ jobs:
           path: ffmpeg
       - name: Build ffmpeg
         run: |
-          apt-get update -qq && apt-get install -y nasm
+          apt-get update -qq && apt-get install -qy nasm
           mkdir ffmpeg-build
           cd ffmpeg-build
           # Set a limit of 3 minutes per process/object file; with unproven
