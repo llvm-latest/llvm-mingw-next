@@ -7,6 +7,7 @@ on:
       - '**.md'
       - '.gitignore'
   pull_request:
+  workflow_dispatch:
   # schedule:
   #   - cron: '0 0 * * *'
 
@@ -204,10 +205,14 @@ jobs:
   linux-cross-aarch64:
     needs: [linux-stage1, linux-profile, prepare]
     runs-on: ubuntu-latest
-    container: ubuntu:devel
+    container:
+      image: ubuntu:devel
+      # support exec i386 binaries
+      options: --privileged tonistiigi/binfmt --install all
     steps:
       - name: Setup Environment
         run: |
+          echo "qemu architectures: " | ls /proc/sys/fs/binfmt_misc
           apt-get update -qq && apt-get install -qqy git
           git config --global http.retry 5
       - uses: actions/checkout@v4
