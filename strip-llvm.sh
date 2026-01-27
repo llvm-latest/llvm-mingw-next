@@ -88,7 +88,7 @@ for i in amdgpu-arch bugpoint c-index-test clang-* clangd clangd-* darwin-debug 
         # was a plain number (as if the original name was clang-7); if it wasn't
         # empty, remove the tool.
         if [ "$(echo $suffix | tr -d '[0-9]')" != "" ]; then
-            rm -f $i -v
+            rm -fv $i
         fi
         ;;
     libclang.dll)
@@ -97,17 +97,17 @@ for i in amdgpu-arch bugpoint c-index-test clang-* clangd clangd-* darwin-debug 
         ;;
     ld64.lld|wasm-ld)
         if [ -e $i ]; then
-            rm $i -v
+            rm -fv $i
         fi
         ;;
     lldb|lldb-server|lldb-argdumper|lldb-instr|lldb-mi|lldb-vscode|lldb-dap)
         ;;
     *)
         if [ -f $i ]; then
-            rm $i -v
+            rm -fv $i
         elif [ -L $i ] && [ ! -e $(readlink $i) ]; then
             # Remove dangling symlinks
-            rm $i -v
+            rm -fv $i
         fi
         ;;
     esac
@@ -124,12 +124,12 @@ if [ -n "$EXEEXT" ]; then
     # lld-link isn't used normally, but can be useful for debugging/testing,
     # and is kept in unix setups. Removing it when packaging for windows,
     # to conserve space.
-    rm -f lld$EXEEXT lld-link$EXEEXT -v
+    rm -fv lld$EXEEXT lld-link$EXEEXT
     # Remove superfluous frontends; these aren't really used.
-    rm -f clang-cpp* clang++* -v
+    rm -fv clang-cpp* clang++*
 fi
 cd ..
-rm -rf libexec
+rm -rfv libexec
 cd share
 cd clang
 for i in *; do
@@ -137,16 +137,16 @@ for i in *; do
     clang-format*)
         ;;
     *)
-        rm -rf $i -v
+        rm -rfv $i
         ;;
     esac
 done
 cd ..
-rm -rf opt-viewer scan-build scan-view -v
-rm -rf man/man1/scan-build*
+rm -rfv opt-viewer scan-build scan-view
+rm -rfv man/man1/scan-build*
 cd ..
 cd include
-rm -rf lld
+rm -rfv lld
 cd ..
 cd lib
 for i in *.dll.a lib*.a; do
@@ -154,7 +154,7 @@ for i in *.dll.a lib*.a; do
     libclang.dll.a|libclang-cpp*|liblldb*|libLLVM-[0-9]*)
         ;;
     *)
-        rm -rf $i -v
+        rm -rfv $i
         ;;
     esac
 done
@@ -165,7 +165,7 @@ for i in *.so* *.dylib* cmake; do
     LLVMgold*)
         ;;
     *)
-        rm -rf $i -v
+        rm -rfv $i
         ;;
     esac
 done
