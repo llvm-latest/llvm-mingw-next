@@ -103,6 +103,15 @@ if [ -n "${HOST_CLANG}" ]; then
     done
 fi
 
+WRAPPER_FLAGS="-flto=thin -ffunction-sections -fdata-sections -fno-unwind-tables -Wl,--gc-sections"
+
+# check mold linker on Linux
+if [ "$(uname)" = "Linux" ]; then
+    if command -v mold >/dev/null; then
+        WRAPPER_FLAGS="$WRAPPER_FLAGS -fuse-ld=mold"
+    fi
+fi
+
 if [ "$(uname)" = "Darwin" ]; then
     if [ -n "$MACOS_REDIST" ]; then
         : ${MACOS_REDIST_ARCHS:=arm64 x86_64}
