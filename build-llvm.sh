@@ -185,11 +185,10 @@ if [ -z "${USE_LINKER:-}" ]; then
     fi
 fi
 
-# build LLVM gold plugin `LLVMgold.so` on Linux
-if [ "$(uname)" = "Linux" ]; then
+# only build the LLVM gold plugin `LLVMgold.so` for native Linux builds
+# prevent build LLVM gold plugin when corss compile from Linux to windows
+if [ "$(uname)" = "Linux" ] && [ -z "$TARGET_WINDOWS" ]; then
     BINUTILS_INCDIR="/usr/include"
-else
-    BINUTILS_INCDIR=""
 fi
 
 if command -v ninja >/dev/null; then
@@ -431,7 +430,7 @@ cmake \
     -DLLVM_TOOLCHAIN_TOOLS="llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-pdbutil;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size;llvm-cxxfilt;llvm-lib" \
     ${HOST+-DLLVM_HOST_TRIPLE=$HOST} \
     -DLLVM_BUILD_INSTRUMENTED=$INSTRUMENTED \
-    -DLLVM_BINUTILS_INCDIR="$BINUTILS_INCDIR" \
+    ${LLVM_BINUTILS_INCDIR+-DLLVM_BINUTILS_INCDIR="$BINUTILS_INCDIR"} \
     ${LLVM_PROFILE_DATA_DIR+-DLLVM_PROFILE_DATA_DIR=$LLVM_PROFILE_DATA_DIR} \
     ${LLVM_PROFDATA_FILE+-DLLVM_PROFDATA_FILE=$LLVM_PROFDATA_FILE} \
     $CMAKEFLAGS \

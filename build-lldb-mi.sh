@@ -116,9 +116,6 @@ if [ -n "$HOST" ]; then
     *-linux*)
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_SYSTEM_NAME=Linux"
         ;;
-    *-darwin)
-        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_SYSTEM_NAME=Darwin"
-        ;;
     *)
         echo "Unrecognized host $HOST"
         exit 1
