@@ -80,7 +80,7 @@ cp ../LICENSE $PREFIX/LICENSE.txt
 mkdir -p $PREFIX/bin
 cp busybox.exe $PREFIX/bin
 
-WRAPPER_FLAGS="-flto=thin -ffunction-sections -fdata-sections -fno-unwind-tables -Wl,--gc-sections"
+WRAPPER_FLAGS="-flto -ffunction-sections -fdata-sections -fno-unwind-tables -Wl,--gc-sections"
 WRAPPER_FLAGS="$WRAPPER_FLAGS -municode -D__USE_MINGW_ANSI_STDIO=0"
 
 # check mold linker on Linux

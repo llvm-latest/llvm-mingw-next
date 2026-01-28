@@ -103,7 +103,7 @@ if [ -n "${HOST_CLANG}" ]; then
     done
 fi
 
-WRAPPER_FLAGS="-flto=thin -ffunction-sections -fdata-sections -fno-unwind-tables -Wl,--gc-sections"
+WRAPPER_FLAGS="-flto -ffunction-sections -fdata-sections -fno-unwind-tables -Wl,--gc-sections"
 
 # check mold linker on Linux
 if [ "$(uname)" = "Linux" ]; then
