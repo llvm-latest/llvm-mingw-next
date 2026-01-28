@@ -104,7 +104,6 @@ if [ -d "$LLVM_SRC" ]; then
 fi
 
 if [ -n "$HOST" ]; then
-    ARCH="${HOST%%-*}"
     BUILDDIR=$BUILDDIR-$HOST
 
     CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER=$HOST-gcc"
@@ -136,24 +135,24 @@ fi
 if [ "$(uname)" = "Darwin" ]; then
     if [ -n "$MACOS_REDIST" ]; then
         : ${MACOS_REDIST_ARCHS:=arm64 x86_64}
-        ARCH_LIST=""
-        NATIVE=
-        for arch in $MACOS_REDIST_ARCHS; do
-            if [ -n "$ARCH_LIST" ]; then
-                ARCH_LIST="$ARCH_LIST;"
-            fi
-            ARCH_LIST="$ARCH_LIST$arch"
-            if [ "$(uname -m)" = "$arch" ]; then
-                NATIVE=1
-            fi
-        done
-        if [ -z "$NATIVE" ]; then
-            # If we're not building for the native arch, flag to CMake that we're
-            # cross compiling.
-            CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_SYSTEM_NAME=Darwin"
-        fi
     else # single architecture
-        ARCH_LIST=$ARCH
+        : ${MACOS_REDIST_ARCHS:=$ARCH}
+    fi
+    ARCH_LIST=""
+    NATIVE=
+    for arch in $MACOS_REDIST_ARCHS; do
+        if [ -n "$ARCH_LIST" ]; then
+            ARCH_LIST="$ARCH_LIST;"
+        fi
+        ARCH_LIST="$ARCH_LIST$arch"
+        if [ "$(uname -m)" = "$arch" ]; then
+            NATIVE=1
+        fi
+    done
+    if [ -z "$NATIVE" ]; then
+        # If we're not building for the native arch, flag to CMake that we're
+        # cross compiling.
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_SYSTEM_NAME=Darwin"
     fi
 
     : ${MACOS_REDIST_VERSION:=10.12}

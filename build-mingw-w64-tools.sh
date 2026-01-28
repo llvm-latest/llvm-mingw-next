@@ -60,7 +60,6 @@ fi
 : ${TARGET_OSES:=${TOOLCHAIN_TARGET_OSES-mingw32 mingw32uwp}}
 
 if [ -n "$HOST" ]; then
-    ARCH="${HOST%%-*}"
     CONFIGFLAGS="$CONFIGFLAGS --host=$HOST"
     CROSS_NAME=-$HOST
     case $HOST in
@@ -78,28 +77,27 @@ fi
 
 if [ "$(uname)" = "Darwin" ]; then
     if [ -n "$MACOS_REDIST" ]; then
-        if [ -z "$CFLAGS" ]; then
-            CFLAGS="-g -O2"
-        fi
         : ${MACOS_REDIST_ARCHS:=arm64 x86_64}
-        NONNATIVE_ARCH=
-        for arch in $MACOS_REDIST_ARCHS; do
-            CFLAGS="$CFLAGS -arch $arch"
-            if [ "$(uname -m)" != "$arch" ]; then
-                case $arch in
-                arm64) NONNATIVE_ARCH=aarch64 ;;
-                *)     NONNATIVE_ARCH=$arch ;;
-                esac
-            fi
-        done
-        if [ -n "$NONNATIVE_ARCH" ]; then
-            # If we're not building for the native arch, flag that we're
-            # cross compiling.
-            CONFIGFLAGS="$CONFIGFLAGS --host=$NONNATIVE_ARCH-apple-darwin"
-        fi
     else # single architecture
-        CFLAGS="$CFLAGS -arch $ARCH"
-        ARCH_LIST=$ARCH
+        : ${MACOS_REDIST_ARCHS:=$ARCH}
+    fi
+    if [ -z "$CFLAGS" ]; then
+        CFLAGS="-g -O2"
+    fi
+    NONNATIVE_ARCH=
+    for arch in $MACOS_REDIST_ARCHS; do
+        CFLAGS="$CFLAGS -arch $arch"
+        if [ "$(uname -m)" != "$arch" ]; then
+            case $arch in
+            arm64) NONNATIVE_ARCH=aarch64 ;;
+            *)     NONNATIVE_ARCH=$arch ;;
+            esac
+        fi
+    done
+    if [ -n "$NONNATIVE_ARCH" ]; then
+        # If we're not building for the native arch, flag that we're
+        # cross compiling.
+        CONFIGFLAGS="$CONFIGFLAGS --host=$NONNATIVE_ARCH-apple-darwin"
     fi
 
     : ${MACOS_REDIST_VERSION:=10.12}

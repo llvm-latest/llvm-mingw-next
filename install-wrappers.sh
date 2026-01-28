@@ -51,7 +51,6 @@ fi
 : ${CC:=cc}
 
 if [ -n "$HOST" ]; then
-    ARCH="${HOST%%-*}"
     case $HOST in
     *-mingw32)
         EXEEXT=.exe

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # Install Essential Tools
 apt-get update -qq
 apt-get install -qy -o Dpkg::Use-Pty=0 \
