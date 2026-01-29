@@ -512,11 +512,59 @@ jobs:
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
           apt-get update -qq && apt-get install -qy libltdl-dev swig autoconf-archive
-          ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-busybox --thinlto --pgo
+          # set --full-llvm to manually run ./strip-llvm.sh
+          ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-busybox --full-llvm --thinlto --pgo
+          ./strip-llvm.sh $(pwd)/install/llvm-mingw --move-llvm=1
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
           cd install
           NAME=llvm-mingw-$TAG-${{matrix.crt}}-${{matrix.arch}}
           mv llvm-mingw $NAME
+
+          # Create LLVM-MinGW Tiny Version Packages
+          if [ "${{matrix.arch}}" == "x86_64" ] && [ "${{matrix.crt}}" == "ucrt" ]; then
+            echo "Packaging LLVM-MinGW tiny versions..."
+
+            # Using 7z format with balanced compression for good decompression speed and size
+            COMPRESS="7z a -t7z -m0=lzma2 -mx=5"
+            FILES=" \
+              -x!$NAME/bin/i686-* \
+              -x!$NAME/bin/arm64ec-* \
+              -x!$NAME/bin/armv7-* \
+              -x!$NAME/i686-w64-mingw32 \
+              -x!$NAME/arm64ec-w64-mingw32 \
+              -x!$NAME/armv7-w64-mingw32 \
+              -x!$NAME/lib/clang/*/lib/linux \
+              -x!$NAME/lib/clang/*/lib/windows/*-i386* \
+              -x!$NAME/lib/clang/*/lib/windows/*-arm* \
+            "
+            X86_64_FILES=" \
+              -x!$NAME/bin/aarch64-* \
+              -x!$NAME/aarch64-w64-mingw32" \
+              -x!$NAME/lib/clang/*/lib/windows/*-aarch64** \
+            "
+            LLVM_FILES="llvm-libs/*"
+
+            # x86_64 only (without LLVM static libraries)
+            echo "Creating LLVM-MinGW for x86_64 target"
+            eval $COMPRESS ../$NAME-tiny.7z $FILES $X86_64_FILES
+
+            # x86_64 + LLVM static libraries
+            echo "Creating LLVM-MinGW for x86_64 target with LLVM static libraries"
+            eval $COMPRESS ../$NAME-tiny+llvm.7z $NAME $FILES $X86_64_FILES $LLVM_FILES
+
+            # x86_64 + aarch64 (without LLVM static libraries)
+            echo "Creating LLVM-MinGW for x86_64 and aarch64 targets"
+            eval $COMPRESS ../$NAME-tiny+aarch64.7z $NAME $FILES
+
+            # x86_64 + aarch64 + LLVM static libraries
+            echo "Creating LLVM-MinGW for x86_64 and aarch64 targets with LLVM static libraries"
+            eval $COMPRESS ../$NAME-tiny+aarch64+llvm.7z $NAME $FILES $LLVM_FILES
+
+            echo "Created Tiny Packages:"
+            ls -lh ../llvm-mingw-$TAG-*.7z
+          fi
+
+          # Create LLVM-MinGW ZIP Package
           zip -9rq ../$NAME.zip $NAME
       - name: Save cache
         if: steps.cache-tarballs.outputs.cache-hit != 'true'
@@ -531,6 +579,24 @@ jobs:
           path: |
             llvm-mingw-*.zip
           retention-days: 7
+      - name: Upload LLVM-MinGW Tiny Packages
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const artifact = require('@actions/artifact');
+            const artifactClient = artifact.create();
+            const files = fs.readdirSync('.').filter(file => file.endsWith('.7z'));
+            for (const file of files) {
+              console.log(`Uploading ${file}...`);
+              const uploadResponse = await artifactClient.uploadArtifact(
+                file,   // Name
+                [file], // Files
+                '.',    // Root Directory
+                { compressionLevel: 0 }
+              );
+              console.log(`Uploaded ${file} - ID: ${uploadResponse.id}`);
+            }
 
   # Run llvm-mingw's tests with the cross-built toolchains from above.
   test-toolchain:

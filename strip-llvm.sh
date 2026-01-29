@@ -23,6 +23,9 @@ while [ $# -gt 0 ]; do
     --host=*)
         HOST="${1#*=}"
         ;;
+    --move-llvm=*)
+        MOVE_LLVM=1
+        ;;
     *)
         PREFIX="$1"
         ;;
@@ -33,10 +36,33 @@ if [ -z "$PREFIX" ]; then
     echo $0 [--host=triple] dir
     exit 1
 fi
-cd "$PREFIX"
 
 if [ -n "$FULL_LLVM" ]; then
     exit 0
+fi
+
+PREFIX="$(cd "$PREFIX" && pwd)"
+cd "$PREFIX"
+
+if [ -n "$MOVE_LLVM" ]; then
+    remove_or_move() {
+        local file="$1"
+        local abs_path="$(realpath -m "$file")"
+        local relative_path="${abs_path#$PREFIX/}"
+        local dest="$(realpath -m "$PREFIX/../llvm-libs/$relative_path")"
+        local dest_dir="$(dirname "$dest")"
+        echo "Moving $relative_path -> $dest"
+        mkdir -p "$dest_dir"
+        mv "$file" "$dest"
+    }
+else
+    remove_or_move() {
+        local file="$1"
+        local abs_path="$(realpath -m "$file")"
+        local relative_path="${abs_path#$PREFIX/}"
+        echo "Removing $relative_pathe"
+        rm -rf "$file"
+    }
 fi
 
 if [ -n "$HOST" ]; then
@@ -88,7 +114,7 @@ for i in amdgpu-arch bugpoint c-index-test clang-* clangd clangd-* darwin-debug 
         # was a plain number (as if the original name was clang-7); if it wasn't
         # empty, remove the tool.
         if [ "$(echo $suffix | tr -d '[0-9]')" != "" ]; then
-            rm -fv $i
+            remove_or_move $i
         fi
         ;;
     libclang.dll)
@@ -97,17 +123,17 @@ for i in amdgpu-arch bugpoint c-index-test clang-* clangd clangd-* darwin-debug 
         ;;
     ld64.lld|wasm-ld)
         if [ -e $i ]; then
-            rm -fv $i
+            remove_or_move $i
         fi
         ;;
     lldb|lldb-server|lldb-argdumper|lldb-instr|lldb-mi|lldb-vscode|lldb-dap)
         ;;
     *)
         if [ -f $i ]; then
-            rm -fv $i
+            remove_or_move $i
         elif [ -L $i ] && [ ! -e $(readlink $i) ]; then
             # Remove dangling symlinks
-            rm -fv $i
+            remove_or_move $i
         fi
         ;;
     esac
@@ -129,7 +155,7 @@ if [ -n "$EXEEXT" ]; then
     rm -fv clang-cpp* clang++*
 fi
 cd ..
-rm -rfv libexec
+remove_or_move libexec
 cd share
 cd clang
 for i in *; do
@@ -137,16 +163,16 @@ for i in *; do
     clang-format*)
         ;;
     *)
-        rm -rfv $i
+        remove_or_move $i
         ;;
     esac
 done
 cd ..
-rm -rfv opt-viewer scan-build scan-view
-rm -rfv man/man1/scan-build*
+rm -rf opt-viewer scan-build scan-view
+rm -rf man/man1/scan-build*
 cd ..
 cd include
-rm -rfv lld
+remove_or_move lld
 cd ..
 cd lib
 for i in *.dll.a lib*.a; do
@@ -154,18 +180,18 @@ for i in *.dll.a lib*.a; do
     libclang.dll.a|libclang-cpp*|liblldb*|libLLVM-[0-9]*)
         ;;
     *)
-        rm -rfv $i
+        remove_or_move $i
         ;;
     esac
 done
-for i in *.so* *.dylib* cmake; do
+for i in *.so* *.dylib*; do
     case $i in
     libclang.so*|libclang.dylib*|libclang-cpp*|liblldb*|libLLVM*)
         ;;
     LLVMgold*)
         ;;
     *)
-        rm -rfv $i
+        remove_or_move $i
         ;;
     esac
 done
