@@ -102,7 +102,12 @@ if [ -n "${HOST_CLANG}" ]; then
     done
 fi
 
-WRAPPER_FLAGS="-flto -ffunction-sections -fdata-sections -fno-unwind-tables -Wl,--gc-sections"
+WRAPPER_FLAGS="-flto -ffunction-sections -fdata-sections -fno-unwind-tables"
+if [ "$(uname)" = "Darwin" ]; then
+    WRAPPER_FLAGS="$WRAPPER_FLAGS -Wl,-dead_strip -Wl,-dead_strip_dylibs"
+else
+    WRAPPER_FLAGS="$WRAPPER_FLAGS -Wl,-s -Wl,--gc-sections"
+fi
 
 # check mold linker on Linux
 if [ "$(uname)" = "Linux" ]; then
@@ -150,9 +155,9 @@ if [ -n "$HOST" ] && [ -n "$EXEEXT" ]; then
         cat $i | sed 's/^DEFAULT_TARGET=.*/DEFAULT_TARGET='$HOST/ > "$PREFIX/bin/$(basename $i)"
     done
 fi
-$CC wrappers/clang-target-wrapper.c -o "$PREFIX/bin/clang-target-wrapper$EXEEXT" -O2 -Wl,-s $WRAPPER_FLAGS
-$CC wrappers/clang-scan-deps-wrapper.c -o "$PREFIX/bin/clang-scan-deps-wrapper$EXEEXT" -O2 -Wl,-s $WRAPPER_FLAGS
-$CC wrappers/llvm-wrapper.c -o "$PREFIX/bin/llvm-wrapper$EXEEXT" -O2 -Wl,-s $WRAPPER_FLAGS
+$CC wrappers/clang-target-wrapper.c -o "$PREFIX/bin/clang-target-wrapper$EXEEXT" -O2 $WRAPPER_FLAGS
+$CC wrappers/clang-scan-deps-wrapper.c -o "$PREFIX/bin/clang-scan-deps-wrapper$EXEEXT" -O2 $WRAPPER_FLAGS
+$CC wrappers/llvm-wrapper.c -o "$PREFIX/bin/llvm-wrapper$EXEEXT" -O2 $WRAPPER_FLAGS
 if [ -n "$EXEEXT" ]; then
     # For Windows, we should prefer the executable wrapper, which also works
     # when invoked from outside of MSYS.
