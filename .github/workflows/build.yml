@@ -544,24 +544,24 @@ jobs:
             "
             LLVM_FILES="llvm-libs/*"
 
-            # x86_64 only (without LLVM static libraries)
+            # x86_64 only
             echo "Creating LLVM-MinGW for x86_64 target"
             eval $COMPRESS ../$NAME-tiny.7z $NAME $FILES $X86_64_FILES
-
-            # x86_64 + LLVM static libraries
-            echo "Creating LLVM-MinGW for x86_64 target with LLVM static libraries"
+            echo ""
+            # x86_64 + LLVM
+            echo "Creating LLVM-MinGW for x86_64 target with LLVM dev libraries"
             eval $COMPRESS ../$NAME-tiny+llvm.7z $NAME $FILES $X86_64_FILES $LLVM_FILES
-
-            # x86_64 + aarch64 (without LLVM static libraries)
+            echo ""
+            # x86_64 + aarch64
             echo "Creating LLVM-MinGW for x86_64 and aarch64 targets"
             eval $COMPRESS ../$NAME-tiny+aarch64.7z $NAME $FILES
-
-            # x86_64 + aarch64 + LLVM static libraries
-            echo "Creating LLVM-MinGW for x86_64 and aarch64 targets with LLVM static libraries"
+            echo ""
+            # x86_64 + aarch64 + LLVM
+            echo "Creating LLVM-MinGW for x86_64 and aarch64 targets with LLVM dev libraries"
             eval $COMPRESS ../$NAME-tiny+aarch64+llvm.7z $NAME $FILES $LLVM_FILES
-
+            echo ""
             echo "Created Tiny Packages:"
-            ls -lh ../llvm-mingw-$TAG-*.7z
+            ls -lh ../*-llvm-mingw-$TAG-*.7z
           fi
 
           # Create LLVM-MinGW ZIP Package
