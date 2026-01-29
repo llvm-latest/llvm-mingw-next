@@ -77,10 +77,6 @@ jobs:
     runs-on: ubuntu-latest
     container: ubuntu:devel
     steps:
-      - name: Setup Environment
-        run: |
-          apt-get update -qq && apt-get install -qqy git
-          git config --global http.retry 5
       - uses: actions/checkout@v4
       - name: Install Dependencies
         run: ./install-dependencies.sh
@@ -117,10 +113,6 @@ jobs:
     runs-on: ubuntu-latest
     container: ubuntu:devel
     steps:
-      - name: Setup Environment
-        run: |
-          apt-get update -qq && apt-get install -qqy git
-          git config --global http.retry 5
       - uses: actions/checkout@v4
       - name: Install Dependencies
         run: ./install-dependencies.sh
@@ -156,10 +148,6 @@ jobs:
     runs-on: ubuntu-latest
     container: ubuntu:devel
     steps:
-      - name: Setup Environment
-        run: |
-          apt-get update -qq && apt-get install -qqy git
-          git config --global http.retry 5
       - uses: actions/checkout@v4
       - name: Install Dependencies
         run: ./install-dependencies.sh
@@ -209,10 +197,9 @@ jobs:
     container:
       image: ubuntu:devel
     steps:
-      - name: Setup Environment
+      - name: Install Docker
         run: |
-          apt-get update -qq && apt-get install -qqy git docker.io
-          git config --global http.retry 5
+          apt-get update -qq && apt-get install -qqy docker.io
       - name: Setup QEMU
         uses: docker/setup-qemu-action@master
         with:
@@ -280,10 +267,6 @@ jobs:
     runs-on: ubuntu-latest
     container: ubuntu:devel
     steps:
-      - name: Setup Environment
-        run: |
-          apt-get update -qq && apt-get install -qqy git
-          git config --global http.retry 5
       - uses: actions/checkout@v4
       - name: Install Dependencies
         run: ./install-dependencies.sh
@@ -474,10 +457,6 @@ jobs:
           - { arch: armv7, crt: ucrt }
           - { arch: aarch64, crt: ucrt }
     steps:
-      - name: Setup Environment
-        run: |
-          apt-get update -qq && apt-get install -qqy git
-          git config --global http.retry 5
       - uses: actions/checkout@v4
       - name: Install Dependencies
         run: ./install-dependencies.sh

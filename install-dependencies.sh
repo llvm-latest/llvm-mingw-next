@@ -14,3 +14,5 @@ apt-get install -qy -o Dpkg::Use-Pty=0 \
     zip unzip bzip2 xz-utils p7zip-full \
     gettext less
 apt-get clean -y
+
+git config --global http.retry 3
