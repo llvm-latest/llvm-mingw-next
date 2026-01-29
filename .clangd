@@ -1,0 +1,11 @@
+
+CompileFlags:
+  Add:
+    - -std=c++26
+    - -freflection
+    - -freflection-latest
+    - -fno-exceptions
+    - -fno-rtti
+
+InlayHints:
+  Enabled: false

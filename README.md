@@ -12,6 +12,7 @@ __Add some missing features and improvements.__
 - Build LLVM gold plugin `LLVMgold.so` for Linux
 - Remove LLVM `NVPTX` target support
 - CI: Use latest ubuntu docker containers `ubuntu:devel` for building
+- Windows: Enable zlib and zstd support
 
 LLVM MinGW
 ==========

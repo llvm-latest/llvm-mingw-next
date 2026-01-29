@@ -191,7 +191,7 @@ for i in *.dll.a lib*.a; do
         ;;
     esac
 done
-for i in *.so* *.dylib*; do
+for i in *.so* *.dylib* cmake; do
     case $i in
     libclang.so*|libclang.dylib*|libclang-cpp*|liblldb*|libLLVM*)
         ;;
