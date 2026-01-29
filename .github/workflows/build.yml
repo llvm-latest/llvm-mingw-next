@@ -517,7 +517,7 @@ jobs:
           ./strip-llvm.sh $(pwd)/install/llvm-mingw --move-llvm=1
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
           cd install
-          NAME=llvm-mingw-$TAG-${{matrix.crt}}-${{matrix.arch}}
+          NAME=windows-x86_64-llvm-mingw-$TAG-${{matrix.crt}}-${{matrix.arch}}
           mv llvm-mingw $NAME
 
           # Create LLVM-MinGW Tiny Version Packages
@@ -546,7 +546,7 @@ jobs:
 
             # x86_64 only (without LLVM static libraries)
             echo "Creating LLVM-MinGW for x86_64 target"
-            eval $COMPRESS ../$NAME-tiny.7z $FILES $X86_64_FILES
+            eval $COMPRESS ../$NAME-tiny.7z $NAME $FILES $X86_64_FILES
 
             # x86_64 + LLVM static libraries
             echo "Creating LLVM-MinGW for x86_64 target with LLVM static libraries"
