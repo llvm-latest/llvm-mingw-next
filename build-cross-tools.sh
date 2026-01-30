@@ -21,6 +21,9 @@ while [ $# -gt 0 ]; do
     --with-python)
         PYTHON=1
         ;;
+    --with-zstd)
+        ZSTD=1
+        ;;
     --with-busybox)
         BUSYBOX=1
         ;;
@@ -92,6 +95,11 @@ if [ -n "$PYTHON" ]; then
     mkdir -p $PREFIX/bin
     cp $PREFIX/python/bin/*.dll $PREFIX/bin
     LLVM_ARGS="$LLVM_ARGS --with-python"
+fi
+
+if [ -n "$ZSTD" ]; then
+    ./build-zstd.sh $PREFIX --host=$HOST
+    LLVM_ARGS="$LLVM_ARGS --with-zstd"
 fi
 
 ./build-llvm.sh $PREFIX --host=$HOST $LLVM_ARGS
