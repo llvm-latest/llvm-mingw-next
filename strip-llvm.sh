@@ -23,7 +23,7 @@ while [ $# -gt 0 ]; do
     --host=*)
         HOST="${1#*=}"
         ;;
-    --move-llvm=*)
+    --move-llvm)
         MOVE_LLVM=1
         ;;
     *)
@@ -44,7 +44,7 @@ fi
 PREFIX="$(cd "$PREFIX" && pwd)"
 cd "$PREFIX"
 
-if [[ $(uname) = "Darwin" ]]; then
+if [ "$(uname)" = "Darwin" ]; then
     if ! command -v grealpath >/dev/null; then
        brew install coreutils
     fi

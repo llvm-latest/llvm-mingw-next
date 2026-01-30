@@ -493,9 +493,7 @@ jobs:
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
           apt-get update -qq && apt-get install -qy libltdl-dev swig autoconf-archive
-          # set --full-llvm to manually run ./strip-llvm.sh
-          ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-busybox --full-llvm --thinlto --pgo
-          ./strip-llvm.sh $(pwd)/install/llvm-mingw --move-llvm=1
+          ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-busybox --move-llvm --thinlto --pgo
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
           cd install
           NAME=windows-x86_64-llvm-mingw-$TAG-${{matrix.crt}}-${{matrix.arch}}

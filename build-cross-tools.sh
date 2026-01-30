@@ -44,6 +44,9 @@ while [ $# -gt 0 ]; do
         LLVM_ARGS="$LLVM_ARGS $1"
         FULL_LLVM=1
         ;;
+    --move-llvm)
+        MOVE_LLVM=1
+        ;;
     --disable-make)
         NO_MAKE=1
         ;;
@@ -96,7 +99,7 @@ if [ -z "$NO_LLDB" ] && [ -z "$NO_LLDB_MI" ]; then
     ./build-lldb-mi.sh $PREFIX --host=$HOST
 fi
 if [ -z "$FULL_LLVM" ]; then
-    ./strip-llvm.sh $PREFIX --host=$HOST
+    ./strip-llvm.sh $PREFIX --host=$HOST ${MOVE_LLVM:+--move-llvm}
 fi
 if [ -z "$NO_MINGW_W64_TOOLS" ]; then
     ./build-mingw-w64-tools.sh $PREFIX --skip-include-triplet-prefix --host=$HOST
