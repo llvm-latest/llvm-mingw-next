@@ -286,14 +286,6 @@ if [ -n "$HOST" ] && [ "$(uname)" != "Darwin" ]; then
         CMAKEFLAGS="$CMAKEFLAGS -DPython3_INCLUDE_DIRS=$PYTHON_INCLUDE_DIR"
         CMAKEFLAGS="$CMAKEFLAGS -DPython3_LIBRARIES=$PYTHON_LIB"
     fi
-
-    if [ -n "$WITH_ZSTD" ] && [ -n "$TARGET_WINDOWS" ]; then
-        CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_ZSTD=ON"
-        ZSTD_INCLUDE_DIR="$$PREFIX/include/zstd"
-        ZSTD_LIB="$$PREFIX/lib"
-        CMAKEFLAGS="$CMAKEFLAGS -Dzstd_INCLUDE_DIR=$ZSTD_INCLUDE_DIR"
-        CMAKEFLAGS="$CMAKEFLAGS -Dzstd_LIBRARY=$ZSTD_LIB"
-    fi
 elif [ -n "$WITH_CLANG" ]; then
     # Build using clang and lld (from $PATH), rather than the system default
     # tools.
@@ -311,6 +303,14 @@ else
     elif command -v ld.gold >/dev/null; then
         CMAKEFLAGS="$CMAKEFLAGS -DLLVM_USE_LINKER=gold"
     fi
+fi
+
+if [ -n "$WITH_ZSTD" ]; then
+    CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_ZSTD=ON"
+    ZSTD_INCLUDE_DIR="$$PREFIX/include/zstd"
+    ZSTD_LIB="$$PREFIX/lib"
+    CMAKEFLAGS="$CMAKEFLAGS -Dzstd_INCLUDE_DIR=$ZSTD_INCLUDE_DIR"
+    CMAKEFLAGS="$CMAKEFLAGS -Dzstd_LIBRARY=$ZSTD_LIB"
 fi
 
 if [ -n "$COMPILER_LAUNCHER" ]; then

@@ -72,6 +72,11 @@ else
     esac
 fi
 
+if [ -n "$COMPILER_LAUNCHER" ]; then
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER_LAUNCHER=$COMPILER_LAUNCHER"
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER_LAUNCHER=$COMPILER_LAUNCHER"
+fi
+
 for arch in $ARCHS; do
     [ -z "$CLEAN" ] || rm -rf build-$arch
     mkdir -p build-$arch
@@ -109,6 +114,7 @@ for arch in $ARCHS; do
         -DLIBCXXABI_LIBDIR_SUFFIX="" \
         -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS" \
         -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS" \
+        $CMAKEFLAGS \
         ..
 
     cmake --build . ${CORES:+-j${CORES}}

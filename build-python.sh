@@ -155,8 +155,13 @@ BUILD=$(../config.guess) # Python configure requires build triplet for cross com
 # Locate the native python3 that we've built before, from the path
 NATIVE_PYTHON="$(command -v python3)"
 
-export CC=$HOST-gcc
-export CXX=$HOST-g++
+if [ -z "$COMPILER_LAUNCHER" ]; then
+    export CC=$HOST-gcc
+    export CXX=$HOST-g++
+else
+    export CC="$COMPILER_LAUNCHER $HOST-gcc"
+    export CXX="$COMPILER_LAUNCHER $HOST-g++"
+fi
 
 ../configure --prefix="$PREFIX" --build=$BUILD --host=$HOST \
     CFLAGS="-I$PREFIX/include" CXXFLAGS="-I$PREFIX/include" LDFLAGS="$LDFLAGS -L$PREFIX/lib" \

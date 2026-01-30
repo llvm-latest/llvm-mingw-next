@@ -81,6 +81,14 @@ jobs:
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@main
+        with:
+          key: ccache-${{ github.job }}
+          restore-keys: ccache-${{ github.job }}
+          max-size: 2GB
+        env:
+          COMPILER_LAUNCHER: ccache
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
@@ -117,6 +125,14 @@ jobs:
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@main
+        with:
+          key: ccache-${{ github.job }}
+          restore-keys: ccache-${{ github.job }}
+          max-size: 2GB
+        env:
+          COMPILER_LAUNCHER: ccache
       - uses: actions/download-artifact@v4
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -152,6 +168,14 @@ jobs:
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@main
+        with:
+          key: ccache-${{ github.job }}
+          restore-keys: ccache-${{ github.job }}
+          max-size: 2GB
+        env:
+          COMPILER_LAUNCHER: ccache
       - uses: actions/download-artifact@v4
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -209,6 +233,14 @@ jobs:
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@main
+        with:
+          key: ccache-${{ github.job }}
+          restore-keys: ccache-${{ github.job }}
+          max-size: 2GB
+        env:
+          COMPILER_LAUNCHER: ccache
       - uses: actions/download-artifact@v4
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -302,6 +334,14 @@ jobs:
       - name: Setup Git Retry
         run: git config --global http.retry 5
       - uses: actions/checkout@v4
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@main
+        with:
+          key: ccache-${{ github.job }}
+          restore-keys: ccache-${{ github.job }}
+          max-size: 2GB
+        env:
+          COMPILER_LAUNCHER: ccache
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
@@ -309,10 +349,10 @@ jobs:
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
-          # Disable zstd and python. Both are available on the runners, but
+          # Disable and python. This is available on the runners, but
           # installed with homebrew, and only available in the native (arm64)
           # form.
-          LLVM_CMAKEFLAGS="-DLLVM_ENABLE_ZSTD=OFF -DLLDB_ENABLE_PYTHON=OFF" ./build-all.sh $(pwd)/install/llvm --stage1 --llvm-only
+          LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ./build-all.sh $(pwd)/install/llvm --stage1 --llvm-only
           .github/workflows/store-version.sh install/llvm/versions.txt
           cd install
           NAME=llvm-$TAG-macos-$(uname -m)
@@ -341,6 +381,14 @@ jobs:
       - name: Setup Git Retry
         run: git config --global http.retry 5
       - uses: actions/checkout@v4
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@main
+        with:
+          key: ccache-${{ github.job }}-{{ matrix.arch }}-{{ matrix.crt }}
+          restore-keys: ccache-${{ github.job }}-{{ matrix.arch }}-{{ matrix.crt }}
+          max-size: 2GB
+        env:
+          COMPILER_LAUNCHER: ccache
       - uses: actions/download-artifact@v4
         with:
           name: macos-llvm
@@ -360,12 +408,12 @@ jobs:
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
-          # Disable zstd and python. Both are available on the runners, but
+          # Disable python. This is available on the runners, but
           # installed with homebrew, and only available in the native (arm64)
           # form. Therefore, autodetection will pick them up, but linking
-          # universal binaries fails as those libraries are unavailable in the
+          # universal binaries fails as this libraries is unavailable in the
           # other (x86_64) architecture form.
-          LLVM_CMAKEFLAGS="-DLLVM_ENABLE_ZSTD=OFF -DLLDB_ENABLE_PYTHON=OFF" ARCH=${{matrix.arch}} ./build-all.sh $HOME/llvm $(pwd)/install/llvm-mingw --thinlto --pgo
+          LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ARCH=${{matrix.arch}} ./build-all.sh $HOME/llvm $(pwd)/install/llvm-mingw --with-zstd --thinlto --pgo
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
           ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           ./run-tests.sh $(pwd)/install/llvm-mingw
@@ -456,6 +504,20 @@ jobs:
           - { arch: aarch64, crt: ucrt }
     steps:
       - uses: actions/checkout@v4
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@main
+        with:
+          key: ccache-${{ github.job }}-{{ matrix.arch }}-{{ matrix.crt }}
+          restore-key: ccache-${{ github.job }}-{{ matrix.arch }}-{{ matrix.crt }}
+          max-size: 2GB
+        env:
+          COMPILER_LAUNCHER: ccache
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
+          sudo: false
+          timeout-minutes: 15
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1

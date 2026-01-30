@@ -49,6 +49,39 @@ if [ -n "$HOST" ]; then
     CROSS_NAME=-$HOST
 fi
 
+if [ -n "$COMPILER_LAUNCHER" ]; then
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER_LAUNCHER=$COMPILER_LAUNCHER"
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER_LAUNCHER=$COMPILER_LAUNCHER"
+fi
+
+if [ "$(uname)" = "Darwin" ]; then
+    if [ -n "$MACOS_REDIST" ]; then
+        : ${MACOS_REDIST_ARCHS:=arm64 x86_64}
+    else # single architecture
+        : ${MACOS_REDIST_ARCHS:=$ARCH}
+    fi
+    ARCH_LIST=""
+    NATIVE=
+    for arch in $MACOS_REDIST_ARCHS; do
+        if [ -n "$ARCH_LIST" ]; then
+            ARCH_LIST="$ARCH_LIST;"
+        fi
+        ARCH_LIST="$ARCH_LIST$arch"
+        if [ "$(uname -m)" = "$arch" ]; then
+            NATIVE=1
+        fi
+    done
+    if [ -z "$NATIVE" ]; then
+        # If we're not building for the native arch, flag to CMake that we're
+        # cross compiling.
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_SYSTEM_NAME=Darwin"
+    fi
+
+    : ${MACOS_REDIST_VERSION:=10.12}
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_OSX_ARCHITECTURES=$ARCH_LIST"
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOS_REDIST_VERSION"
+fi
+
 cd zstd
 
 [ -z "$CLEAN" ] || rm -rf build$CROSS_NAME
@@ -63,14 +96,15 @@ cmake \
     -DZSTD_BUILD_PROGRAMS=OFF \
     -DBUILD_SHARED_LIBS=ON \
     -DBUILD_TESTING=OFF \
+    $CMAKEFLAGS \
     ..
 cmake --build . -j$CORES
 cmake --install . --strip --prefix .
 
 # excluded lib/cmake/zstd lib/pkgconfig/libzstd.pc
 mkdir -p "$PREFIX/bin"
-cp bin/libzstd.dll "$PREFIX/bin"
+cp -r bin "$PREFIX/bin"
 mkdir -p "$PREFIX/include/zstd"
-cp include "$PREFIX/include/zstd"
+cp include/* "$PREFIX/include/zstd"
 mkdir -p "$PREFIX/lib"
 cp lib/libzstd*.a "$PREFIX/lib"

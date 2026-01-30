@@ -10,8 +10,9 @@ __Add some missing features and improvements.__
 - Use `mold` linker by default on Linux
 - Build LLVM gold plugin `LLVMgold.so` for Linux
 - Removed LLVM `NVPTX` target support
-- CI: Use latest ubuntu docker containers `ubuntu:devel` for building
-- Windows: Enabled zstd support for LLVM
+- CI: Using the latest ubuntu docker container `ubuntu:devel` for building
+- CI: Support for speedup building using `ccache`
+- Windows/macOS: Enabled `zstd` support for LLVM
 
 LLVM MinGW
 ==========

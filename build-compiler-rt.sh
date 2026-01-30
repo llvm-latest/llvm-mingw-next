@@ -82,6 +82,11 @@ else
     esac
 fi
 
+if [ -n "$COMPILER_LAUNCHER" ]; then
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER_LAUNCHER=$COMPILER_LAUNCHER"
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER_LAUNCHER=$COMPILER_LAUNCHER"
+fi
+
 cd llvm-project/compiler-rt
 
 INSTALL_PREFIX="$CLANG_RESOURCE_DIR"
@@ -109,6 +114,7 @@ if [ -n "$NATIVE" ]; then
         -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
         -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
         -DCOMPILER_RT_USE_LIBCXX=OFF \
+        $CMAKEFLAGS \
         $SRC_DIR
     cmake --build . ${CORES:+-j${CORES}}
     cmake --install . --prefix "$INSTALL_PREFIX"
@@ -150,6 +156,7 @@ for arch in $ARCHS; do
         -DSANITIZER_CXX_ABI=libc++ \
         -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS" \
         -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS" \
+        -$CMAKEFLAGS \
         $SRC_DIR
     cmake --build . ${CORES:+-j${CORES}}
 
