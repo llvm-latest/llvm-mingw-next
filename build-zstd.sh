@@ -133,9 +133,11 @@ cmake --build . -j$CORES
 cmake --install . --prefix . --strip
 
 # excluded lib/cmake/zstd lib/pkgconfig/libzstd.pc
-mkdir -p "$PREFIX/bin"
-cp -r bin "$PREFIX/bin"
+if [ -d "bin" ]; then # Windows dynamic library
+    mkdir -p "$PREFIX/bin"
+    cp -r bin/libzstd.dll "$PREFIX/bin"
+fi
 mkdir -p "$PREFIX/include/zstd"
 cp include/* "$PREFIX/include/zstd"
 mkdir -p "$PREFIX/lib"
-cp lib/libzstd*.a "$PREFIX/lib"
+cp lib/libzstd* "$PREFIX/lib"
