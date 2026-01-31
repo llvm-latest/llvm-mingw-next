@@ -85,7 +85,7 @@ jobs:
         uses: jianmingyong/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 800MB
+          max-size: 800M
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
@@ -127,7 +127,7 @@ jobs:
         uses: jianmingyong/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 800MB
+          max-size: 800M
       - uses: actions/download-artifact@v4
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -168,7 +168,7 @@ jobs:
         uses: jianmingyong/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 1GB
+          max-size: 1G
       - uses: actions/download-artifact@v4
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -231,7 +231,7 @@ jobs:
         uses: jianmingyong/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 800MB
+          max-size: 800M
       - uses: actions/download-artifact@v4
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -330,7 +330,7 @@ jobs:
         uses: jianmingyong/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 800MB
+          max-size: 800M
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
@@ -375,7 +375,7 @@ jobs:
         uses: jianmingyong/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-{{ matrix.arch }}-{{ matrix.crt }}
-          max-size: 800MB
+          max-size: 800M
       - uses: actions/download-artifact@v4
         with:
           name: macos-llvm
@@ -499,7 +499,7 @@ jobs:
         uses: jianmingyong/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-{{ matrix.arch }}-{{ matrix.crt }}
-          max-size: 800MB
+          max-size: 800M
       - uses: actions/download-artifact@v4
         with:
           name: linux-stage1-${{matrix.crt}}-x86_64-toolchain
