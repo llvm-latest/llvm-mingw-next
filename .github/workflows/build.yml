@@ -347,7 +347,7 @@ jobs:
           # Disable and python. This is available on the runners, but
           # installed with homebrew, and only available in the native (arm64)
           # form.
-          LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ./build-all.sh $(pwd)/install/llvm --stage1 --llvm-only
+          LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ./build-all.sh $(pwd)/install/llvm --stage1 --with-zstd --llvm-only
           .github/workflows/store-version.sh install/llvm/versions.txt
           cd install
           NAME=llvm-$TAG-macos-$(uname -m)

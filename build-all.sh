@@ -36,6 +36,12 @@ while [ $# -gt 0 ]; do
         LLVM_ARGS="$LLVM_ARGS $1"
         FULL_LLVM=1
         ;;
+    --with-python)
+        WITH_PYTHON=1
+        ;;
+    --with-zstd)
+        WITH_ZSTD=1
+        ;;
     --disable-lldb)
         LLVM_ARGS="$LLVM_ARGS $1"
         NO_LLDB=1
@@ -193,7 +199,17 @@ fi
 
 if [ -z "$NO_TOOLS" ]; then
     if [ -z "${HOST_CLANG}" ]; then
+        if [ -n "$WITH_PYTHON" ]; then
+            ./build-python.sh $PREFIX $HOST_ARGS
+            LLVM_ARGS="$LLVM_ARGS --with-python"
+        fi
+        if [ -n "$WITH_ZSTD" ]; then
+            ./build-zstd.sh $PREFIX $HOST_ARGS
+            LLVM_ARGS="$LLVM_ARGS --with-zstd"
+        fi
+
         ./build-llvm.sh $PREFIX $LLVM_ARGS $HOST_ARGS
+
         if [ -n "$PROFILE" ]; then
             ./pgo-training.sh llvm-project/llvm/build-instrumented $STAGE1_PREFIX
             exit 0
