@@ -156,7 +156,7 @@ for arch in $ARCHS; do
         -DSANITIZER_CXX_ABI=libc++ \
         -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS" \
         -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS" \
-        -$CMAKEFLAGS \
+        $CMAKEFLAGS \
         $SRC_DIR
     cmake --build . ${CORES:+-j${CORES}}
 
