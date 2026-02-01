@@ -1,3 +1,4 @@
+/build
 /llvm-project
 /mingw-w64
 /lldb-mi
@@ -6,8 +7,6 @@
 /cpython*
 /python-native
 /toolchain
-<<<<<<< HEAD
-=======
 
 #==============================================================================#
 # Directories to ignore (do not add trailing '/'s, they skip symlinks).
@@ -17,4 +16,3 @@
 .vs
 #zed config files
 .zed
->>>>>>> ce70d02 (Update .gitignore)
