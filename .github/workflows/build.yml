@@ -138,7 +138,6 @@ jobs:
           TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
-          COMPILER_LAUNCHER: ccache
         run: |
           # Build LLVM in mostly the same way as it is going to be built in the
           # final form.
