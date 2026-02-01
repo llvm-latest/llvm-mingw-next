@@ -60,6 +60,14 @@ for lib in winpthreads winstorecompat; do
     cd $lib
     for arch in $ARCHS; do
         [ -z "$CLEAN" ] || rm -rf build-$arch
+        if [ -z "$COMPILER_LAUNCHER" ]; then
+            export CC=$arch-w64-mingw32-gcc
+            export CXX=$arch-w64-mingw32-g++
+        else
+            export CC="$COMPILER_LAUNCHER $arch-w64-mingw32-gcc"
+            export CXX="$COMPILER_LAUNCHER $arch-w64-mingw32-g++"
+        fi
+
         mkdir -p build-$arch
         cd build-$arch
         arch_prefix="$PREFIX/$arch-w64-mingw32"
