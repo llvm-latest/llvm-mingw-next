@@ -124,11 +124,6 @@ jobs:
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
-      - name: Setup ccache
-        uses: jianmingyong/ccache-action@main
-        with:
-          ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 800M
       - uses: actions/download-artifact@v4
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
