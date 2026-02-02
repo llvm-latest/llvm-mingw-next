@@ -215,7 +215,7 @@ if [ -z "$NO_TOOLS" ]; then
             exit 0
         fi
         if [ -z "$NO_LLDB" ] && [ -z "$NO_LLDB_MI" ]; then
-            ./build-lldb-mi.sh $PREFIX $HOST_ARGS ${$WITH_ZSTD+--with-zstd}
+            ./build-lldb-mi.sh $PREFIX $HOST_ARGS ${WITH_ZSTD+--with-zstd}
         fi
         if [ -z "$FULL_LLVM" ]; then
             ./strip-llvm.sh $PREFIX $HOST_ARGS
