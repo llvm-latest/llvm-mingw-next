@@ -180,7 +180,7 @@ cd include
 remove_or_move lld
 # Removing zstd headers in release build
 if [ -n "$RELEASE_BUILD" ]; then
-    remove_with_log zdict.h zstd.h zstd_errors.h
+    remove_with_log zstd
 fi
 cd ..
 cd lib
