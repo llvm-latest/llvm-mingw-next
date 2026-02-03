@@ -175,7 +175,7 @@ cd include
 remove_or_move lld
 cd ..
 cd lib
-for i in *.dll.a lib*.a; do
+for i in lib*.a; do
     case $i in
     libclang.dll.a|libclang-cpp*|liblldb*|libLLVM-[0-9]*)
         ;;
