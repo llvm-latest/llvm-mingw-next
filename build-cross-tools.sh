@@ -107,7 +107,7 @@ if [ -z "$NO_LLDB" ] && [ -z "$NO_LLDB_MI" ]; then
     ./build-lldb-mi.sh $PREFIX --host=$HOST ${ZSTD+--with-zstd}
 fi
 if [ -z "$FULL_LLVM" ]; then
-    ./strip-llvm.sh $PREFIX --host=$HOST ${MOVE_LLVM:+--move-llvm}
+    ./strip-llvm.sh $PREFIX --host=$HOST ${MOVE_LLVM:+--move-llvm} --release-build
 fi
 if [ -z "$NO_MINGW_W64_TOOLS" ]; then
     ./build-mingw-w64-tools.sh $PREFIX --skip-include-triplet-prefix --host=$HOST

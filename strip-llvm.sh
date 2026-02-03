@@ -26,6 +26,9 @@ while [ $# -gt 0 ]; do
     --move-llvm)
         MOVE_LLVM=1
         ;;
+    --release-build)
+        RELEASE_BUILD=1
+        ;;
     *)
         PREFIX="$1"
         ;;
@@ -44,6 +47,14 @@ fi
 PREFIX="$(cd "$PREFIX" && pwd)"
 cd "$PREFIX"
 
+remove_with_log() {
+    local file="$1"
+    local abs_path="$(pwd)/$file"
+    local relative_path="${abs_path#$PREFIX/}"
+    echo "Removing $relative_path"
+    rm -rf "$file"
+}
+
 if [ -n "$MOVE_LLVM" ]; then
     remove_or_move() {
         local file="$1"
@@ -56,13 +67,7 @@ if [ -n "$MOVE_LLVM" ]; then
         mv "$file" "$dest"
     }
 else
-    remove_or_move() {
-        local file="$1"
-        local abs_path="$(pwd)/$file"
-        local relative_path="${abs_path#$PREFIX/}"
-        echo "Removing $relative_path"
-        rm -rf "$file"
-    }
+    alias remove_or_move=remove_with_log
 fi
 
 if [ -n "$HOST" ]; then
@@ -173,13 +178,21 @@ rm -rf man/man1/scan-build*
 cd ..
 cd include
 remove_or_move lld
+# Removing zstd headers in release build
+if [ -n "$RELEASE_BUILD" ]; then
+    remove_with_log zdict.h zstd.h zstd_errors.h
+fi
 cd ..
 cd lib
 for i in lib*.a; do
     case $i in
     libclang.dll.a|libclang-cpp*|liblldb*|libLLVM-[0-9]*)
         ;;
-    libzstd.*) # thirdparty libs
+    libzstd*) # thirdparty libs
+        # Removing zstd libraries in release build
+        if [ -n "$RELEASE_BUILD" ]; then
+            remove_with_log $i
+        fi
         ;;
     *)
         remove_or_move $i

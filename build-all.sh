@@ -134,6 +134,10 @@ if [ -n "$PREFIX_PGO" ] && [ -z "$PGO" ] && [ -z "$FULL_PGO" ]; then
     exit 1
 fi
 
+if [ -z "$STAGE1" ] && [ -z "$INSTRUMENTATION" ]; then
+    RELEASE_BUILD=1
+fi
+
 for dep in git cmake ${HOST_CLANG}; do
     if ! command -v $dep >/dev/null; then
         echo "$dep not installed. Please install it and retry" 1>&2
@@ -218,7 +222,7 @@ if [ -z "$NO_TOOLS" ]; then
             ./build-lldb-mi.sh $PREFIX $HOST_ARGS ${WITH_ZSTD+--with-zstd}
         fi
         if [ -z "$FULL_LLVM" ]; then
-            ./strip-llvm.sh $PREFIX $HOST_ARGS
+            ./strip-llvm.sh $PREFIX $HOST_ARGS ${RELEASE_BUILD+--release-build}
         fi
         if [ -n "$STAGE1" ]; then
             if [ "$(uname)" = "Darwin" ]; then
