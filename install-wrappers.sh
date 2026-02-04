@@ -54,12 +54,14 @@ if [ -n "$HOST" ]; then
     case $HOST in
     *-mingw32)
         EXEEXT=.exe
+        TARGET_WINDOWS=1
         ;;
     esac
 else
     case $(uname) in
     MINGW*)
         EXEEXT=.exe
+        TARGET_WINDOWS=1
         ;;
     esac
 fi
@@ -110,7 +112,7 @@ else
 fi
 
 # check mold linker on Linux
-if [ "$(uname)" = "Linux" ]; then
+if [ "$(uname)" = "Linux" ] && [ -z "$TARGET_WINDOWS" ]; then
     if command -v mold >/dev/null; then
         WRAPPER_FLAGS="$WRAPPER_FLAGS -fuse-ld=mold"
     fi

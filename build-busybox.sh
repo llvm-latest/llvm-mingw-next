@@ -52,6 +52,20 @@ fi
 : ${CORES:=$(sysctl -n hw.ncpu 2>/dev/null)}
 : ${CORES:=4}
 
+if [ -n "$HOST" ]; then
+    case $HOST in
+    *-mingw32)
+        TARGET_WINDOWS=1
+        ;;
+    esac
+else
+    case $(uname) in
+    MINGW*)
+        TARGET_WINDOWS=1
+        ;;
+    esac
+fi
+
 if [ ! -d busybox-w32 ]; then
     git clone https://github.com/rmyorston/busybox-w32
     CHECKOUT=1
@@ -89,7 +103,7 @@ fi
 WRAPPER_FLAGS="$WRAPPER_FLAGS -municode -D__USE_MINGW_ANSI_STDIO=0"
 
 # check mold linker on Linux
-if [ "$(uname)" = "Linux" ]; then
+if [ "$(uname)" = "Linux" ] && [ -z "$TARGET_WINDOWS" ]; then
     if command -v mold >/dev/null; then
         WRAPPER_FLAGS="$WRAPPER_FLAGS -fuse-ld=mold"
     fi
