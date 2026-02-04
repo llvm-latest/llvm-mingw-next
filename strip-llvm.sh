@@ -155,9 +155,9 @@ if [ -n "$EXEEXT" ]; then
     # lld-link isn't used normally, but can be useful for debugging/testing,
     # and is kept in unix setups. Removing it when packaging for windows,
     # to conserve space.
-    rm -fv lld$EXEEXT lld-link$EXEEXT
+    rm -f lld$EXEEXT lld-link$EXEEXT
     # Remove superfluous frontends; these aren't really used.
-    rm -fv clang-cpp* clang++*
+    rm -f clang-cpp* clang++*
 fi
 cd ..
 remove_or_move libexec
@@ -180,7 +180,9 @@ cd include
 remove_or_move lld
 # Removing zstd headers in release build
 if [ -n "$RELEASE_BUILD" ]; then
-    remove_with_log zstd
+    if [ -d zstd ]; then
+        remove_with_log zstd
+    fi
 fi
 cd ..
 cd lib
@@ -191,11 +193,15 @@ for i in lib*.a; do
     libzstd*) # thirdparty libs
         # Removing zstd libraries in release build
         if [ -n "$RELEASE_BUILD" ]; then
-            remove_with_log $i
+            if [ -f $i ]; then
+                remove_with_log $i
+            fi
         fi
         ;;
     *)
-        remove_or_move $i
+        if [ -e $i ]; then
+            remove_or_move $i
+        fi
         ;;
     esac
 done
@@ -206,7 +212,9 @@ for i in *.so* *.dylib* cmake; do
     LLVMgold*)
         ;;
     *)
-        remove_or_move $i
+        if [ -e $i ]; then
+            remove_or_move $i
+        fi
         ;;
     esac
 done
