@@ -87,6 +87,7 @@ jobs:
         with:
           ccache-key-prefix: ccache_${{ github.job }}
           max-size: 800M
+          sloppiness: time_macros,include_file_mtime,include_file_ctime
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
@@ -164,6 +165,7 @@ jobs:
         with:
           ccache-key-prefix: ccache_${{ github.job }}
           max-size: 1G
+          sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v4
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -227,6 +229,7 @@ jobs:
         with:
           ccache-key-prefix: ccache_${{ github.job }}
           max-size: 800M
+          sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v4
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -326,6 +329,7 @@ jobs:
         with:
           ccache-key-prefix: ccache_${{ github.job }}
           max-size: 800M
+          sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
@@ -371,6 +375,7 @@ jobs:
         with:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
           max-size: 800M
+          sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v4
         with:
           name: macos-llvm
@@ -495,6 +500,7 @@ jobs:
         with:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
           max-size: 800M
+          sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v4
         with:
           name: linux-stage1-${{matrix.crt}}-x86_64-toolchain
