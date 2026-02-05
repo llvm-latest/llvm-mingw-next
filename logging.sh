@@ -58,12 +58,14 @@ log_start() {
     TITLE="${1:-$(basename "$0")}"
     TITLE_LENGTH=$((${#TITLE} - 2))
 
-    local sep="==================================$(repeat_char "=" "$TITLE_LENGTH")"
+    local sep="===============================$(repeat_char "=" "$TITLE_LENGTH")"
+    local sep2="+-----------------------------$(repeat_char "-" "$TITLE_LENGTH")+"
     echo $sep
-    echo "===== Start Executing: $TITLE ========"
+    echo "===== Start Executing: $TITLE ====="
     echo $sep
     echo "Time: $(date '+%Y-%m-%d %H:%M:%S')"
     echo $sep
+    echo $sep2
 }
 
 # Function to print end banner
@@ -71,21 +73,24 @@ log_end() {
     local end_time=$(date +%s)
     local elapsed=$(calculate_elapsed $LOG_START_TIME $end_time)
     local sep="==================================$(repeat_char "=" "$TITLE_LENGTH")"
+    local sep2="+--------------------------------$(repeat_char "-" "$TITLE_LENGTH")+"
     echo $sep
     echo "===== Execution Finished: $TITLE ====="
     echo $sep
     echo "Time: $(date '+%Y-%m-%d %H:%M:%S')"
     echo "Elapsed: $elapsed"
     echo $sep
+    echo $sep2
 }
 
 # Function to print error banner
 log_error() {
     local end_time=$(date +%s)
     local elapsed=$(calculate_elapsed $LOG_START_TIME $end_time)
-    local sep="==================================$(repeat_char "=" "$TITLE_LENGTH")"
+    local sep="================================$(repeat_char "=" "$TITLE_LENGTH")"
+    local sep2="+------------------------------$(repeat_char "-" "$TITLE_LENGTH")+"
     echo $sep
-    echo "===== Execution Failed: $TITLE ======="
+    echo "===== Execution Failed: $TITLE ====="
     echo $sep
     echo "Time: $(date '+%Y-%m-%d %H:%M:%S')"
     echo "Elapsed: $elapsed"
@@ -93,6 +98,7 @@ log_error() {
         echo "Error: $1"
     fi
     echo $sep
+    echo $sep2
 }
 
 # Initialize the logging
