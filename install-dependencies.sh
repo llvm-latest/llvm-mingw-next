@@ -3,6 +3,8 @@
 set -e
 
 # Install apt-fast
+apt-get update -qq
+apt-get install -y -o Dpkg::Use-Pty=0 software-properties-common
 add-apt-repository ppa:apt-fast/stable
 apt-get update -qq
 apt-get install -y -o Dpkg::Use-Pty=0 apt-fast
