@@ -54,7 +54,7 @@ jobs:
         with:
           image: tonistiigi/binfmt
           cache-image: false
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Test using the cross-built assembled toolchain
         run: |
           mount -t binfmt_misc none /proc/sys/fs/binfmt_misc
