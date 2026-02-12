@@ -569,7 +569,7 @@ jobs:
             ROOT=$NAME
             PREFIX=windows-x86_64-llvm-mingw-$TAG-${{matrix.crt}}
             # Using 7z format with balanced compression for good decompression speed and size
-            COMPRESS="7z a -t7z -m0=lzma2 -mx=5"
+            COMPRESS="7z a -t7z -m0=lzma2 -mx=5 -snl"
             FILES=" \
               -x!$ROOT/bin/i686-* \
               -x!$ROOT/bin/arm64ec-* \
