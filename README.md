@@ -3,6 +3,7 @@ This Fork
 
 __Add some missing features and several improvements.__
 
+- This project is built based on the [llvm-latest/llvm-p2996](https://github.com/llvm-latest/llvm-p2996)
 - Support for building `LLVM`/`Clang`/`LLDB`/`Clang-Tidy` plugins
   - Add `llvm`/`llvm-c`/`clang`/`clang-c`/`lldb`/`clang-tidy` headers
   - Add `libclang` dynamic library
