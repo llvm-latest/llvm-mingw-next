@@ -17,6 +17,7 @@
 set -e
 
 . ./logging.sh
+NO_LLDB=1
 
 while [ $# -gt 0 ]; do
     case "$1" in

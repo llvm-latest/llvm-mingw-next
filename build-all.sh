@@ -23,6 +23,7 @@ LLVM_ARGS=""
 MINGW_ARGS=""
 CFGUARD_ARGS="--enable-cfguard"
 HOST_ARGS=""
+NO_LLDB=1
 
 while [ $# -gt 0 ]; do
     case "$1" in
