@@ -88,6 +88,7 @@ jobs:
           ccache-key-prefix: ccache_${{ github.job }}
           max-size: 800M
           sloppiness: time_macros,include_file_mtime,include_file_ctime
+          install: false
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
@@ -182,6 +183,7 @@ jobs:
           ccache-key-prefix: ccache_${{ github.job }}
           max-size: 1G
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
+          install: false
       - uses: actions/download-artifact@v7
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -246,6 +248,7 @@ jobs:
           ccache-key-prefix: ccache_${{ github.job }}
           max-size: 800M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
+          install: false
       - uses: actions/download-artifact@v7
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -346,6 +349,7 @@ jobs:
           ccache-key-prefix: ccache_${{ github.job }}
           max-size: 800M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
+          install: false
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
@@ -354,6 +358,7 @@ jobs:
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
+          brew install ccache
           # Disable and python. This is available on the runners, but
           # installed with homebrew, and only available in the native (arm64)
           # form.
@@ -392,6 +397,7 @@ jobs:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
           max-size: 800M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
+          install: false
       - uses: actions/download-artifact@v7
         with:
           name: macos-llvm
@@ -412,6 +418,7 @@ jobs:
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
+          brew install ccache
           # Disable python. This is available on the runners, but
           # installed with homebrew, and only available in the native (arm64)
           # form. Therefore, autodetection will pick them up, but linking
@@ -458,6 +465,13 @@ jobs:
             toolchain:p
             cmake:p
             ninja:p
+      - uses: rui314/setup-mold@v1
+      - name: Setup ccache
+        uses: jianmingyong/ccache-action@main
+        with:
+          ccache-key-prefix: ccache_${{ github.job }}-ucrt-msys2-${{ matrix.sys }}
+          max-size: 800M
+          sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       # - uses: MinoruSekine/setup-scoop@main
       #   with:
       #     apps: mold
@@ -517,6 +531,7 @@ jobs:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
           max-size: 800M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
+          install: false
       - uses: actions/download-artifact@v7
         with:
           name: linux-stage1-${{matrix.crt}}-x86_64-toolchain
@@ -628,7 +643,7 @@ jobs:
             const files = fs.readdirSync('.').filter(file => file.endsWith('.7z'));
             for (const file of files) {
               console.log(`Uploading ${file}...`);
-              const uploadResponse = await artifactClient.uploadArtifact(
+              const uploadResponse = await artifact.uploadArtifact(
                 file,   // Name
                 [file], // Files
                 '.',    // Root Directory
