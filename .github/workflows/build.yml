@@ -322,7 +322,6 @@ jobs:
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
-          brew install ccache
           # Disable and python. This is available on the runners, but
           # installed with homebrew, and only available in the native (arm64)
           # form.
@@ -379,7 +378,6 @@ jobs:
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
-          brew install ccache
           # Disable python. This is available on the runners, but
           # installed with homebrew, and only available in the native (arm64)
           # form. Therefore, autodetection will pick them up, but linking
