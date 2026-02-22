@@ -30,8 +30,11 @@ LLDB=ON
 CLANG_TOOLS_EXTRA=ON
 NO_LLVM_TOOL_REUSE=1
 INSTRUMENTED=OFF
-
 unset LLDB # NOTE: disable lldb by default
+
+if [ "$(uname)" != "Darwin" ]; then
+    WITH_CLANG=1
+fi
 
 while [ $# -gt 0 ]; do
     case "$1" in

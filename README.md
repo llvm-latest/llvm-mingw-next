@@ -15,7 +15,6 @@ __Add some missing features and several improvements.__
 - CI: Using the latest ubuntu docker container `ubuntu:devel` for building
 - CI: Support for speedup building using `ccache`
 - CI: Add logging to build scripts
-- CI: Parallelize `linux-stage1` tests to saving several minutes in the build
 - Windows/macOS: Enabled `zstd` support for LLVM
 
 LLVM MinGW
