@@ -103,6 +103,8 @@ jobs:
           # llvm-mingw).
           LLVM_CMAKEFLAGS="-DLLVM_ENABLE_LIBXML2=OFF -DLLDB_ENABLE_PYTHON=OFF" ./build-all.sh $(pwd)/install/llvm-mingw --stage1
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
+          ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
+          ./run-tests.sh $(pwd)/install/llvm-mingw
           cd install
           DISTRO=ubuntu-$(grep DISTRIB_RELEASE /etc/lsb-release | cut -f 2 -d =)-$(uname -m)
           NAME=llvm-mingw-stage1-$TAG-ucrt-$DISTRO
@@ -114,24 +116,6 @@ jobs:
           path: |
             llvm-mingw-*.tar.xz
           retention-days: 7
-
-  test-stage1:
-    needs: [linux-stage1]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v7
-        with:
-          name: linux-stage1-ucrt-x86_64-toolchain
-      - name: Unpack stage1 Clang
-        run: |
-          tar -Jxf llvm-mingw-*.tar.xz
-          rm llvm-mingw-*.tar.xz
-          mv llvm-mingw* llvm-mingw-stage1
-      - name: Run tests
-        run: |
-          ./test-libcxx-module.sh $(pwd)/llvm-mingw-stage1
-          ./run-tests.sh $(pwd)/llvm-mingw-stage1
 
   linux-profile:
     needs: [prepare, linux-stage1]
@@ -169,7 +153,7 @@ jobs:
 
   # Build a cross compiler for Linux, targeting Windows.
   linux:
-    needs: [prepare, linux-stage1, test-stage1, linux-profile]
+    needs: [prepare, linux-stage1, linux-profile]
     runs-on: ubuntu-latest
     container: ubuntu:devel
     steps:
@@ -225,7 +209,7 @@ jobs:
   # Crosscompile the toolchain for running on Linux on a different architecture, bundle the runtime
   # libraries that were built in the 'linux-stage1' step above.
   linux-cross-aarch64:
-    needs: [linux-stage1, test-stage1, linux-profile, prepare]
+    needs: [linux-stage1, linux-profile, prepare]
     runs-on: ubuntu-latest
     container:
       image: ubuntu:devel
@@ -377,7 +361,7 @@ jobs:
 
   # Build a cross compiler for macOS, targeting Windows.
   macos:
-    needs: [prepare, macos-stage1, test-stage1, linux-profile]
+    needs: [prepare, macos-stage1, linux-profile]
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -510,7 +494,7 @@ jobs:
   # llvm and make a proper standalone toolchain for Windows (for all 4
   # architectures). The binaries built here match actual releases quite closely.
   linux-cross-windows:
-    needs: [linux-stage1, test-stage1, linux-profile, prepare]
+    needs: [linux-stage1, linux-profile, prepare]
     runs-on: ubuntu-latest
     container: ubuntu:devel
     strategy:
