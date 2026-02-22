@@ -465,7 +465,7 @@ jobs:
             toolchain:p
             cmake:p
             ninja:p
-      - uses: rui314/setup-mold@v1
+      # - uses: rui314/setup-mold@v1
       - name: Setup ccache
         uses: jianmingyong/ccache-action@main
         with:
