@@ -21,7 +21,6 @@ set -e
 : ${LLVM_REPOSITORY:=https://github.com/llvm/llvm-project.git}
 : ${LLVM_VERSION:=8701cfc0008c4756f04f9839fd4afbb3f112bdad}
 ASSERTS=OFF
-WITH_CLANG=1
 unset HOST
 BUILDDIR="build"
 LINK_DYLIB=ON
@@ -31,6 +30,10 @@ LLDB=ON
 CLANG_TOOLS_EXTRA=ON
 NO_LLVM_TOOL_REUSE=1
 INSTRUMENTED=OFF
+
+if [ "$(uname)" != "Darwin" ]; then
+    WITH_CLANG=1
+fi
 
 while [ $# -gt 0 ]; do
     case "$1" in

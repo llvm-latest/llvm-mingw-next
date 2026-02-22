@@ -450,12 +450,12 @@ jobs:
             cmake:p
             ninja:p
       # - uses: rui314/setup-mold@v1
-      - name: Setup ccache
-        uses: jianmingyong/ccache-action@main
-        with:
-          ccache-key-prefix: ccache_${{ github.job }}-ucrt-msys2-${{ matrix.sys }}
-          max-size: 800M
-          sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
+      # - name: Setup ccache
+      #   uses: jianmingyong/ccache-action@main
+      #   with:
+      #     ccache-key-prefix: ccache_${{ github.job }}-ucrt-msys2-${{ matrix.sys }}
+      #     max-size: 800M
+      #     sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       # - uses: MinoruSekine/setup-scoop@main
       #   with:
       #     apps: mold
@@ -469,7 +469,7 @@ jobs:
           TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
-          COMPILER_LAUNCHER: ccache
+          # COMPILER_LAUNCHER: ccache # TODO: support ccache
         run: |
           if [ "${{matrix.sys}}" = "mingw64" ]; then
               ARGS="--disable-dylib"
