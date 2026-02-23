@@ -521,7 +521,11 @@ jobs:
           COMPILER_LAUNCHER: ccache
         run: |
           sudo apt-get update -qq && sudo apt-get install -qy libltdl-dev swig autoconf-archive
-          ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zstd --with-busybox --move-llvm --thinlto --pgo
+          if [ "${{matrix.arch}}" = "x86_64" ] && [ "${{matrix.crt}}" = "ucrt" ]; then
+            ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zstd --with-busybox --move-llvm --thinlto --pgo
+          else
+            ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zstd --with-busybox --thinlto --pgo
+          fi
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
       - name: Create archives
         env:
