@@ -123,6 +123,9 @@ for i in amdgpu-arch bugpoint c-index-test clang-* clangd clangd-* darwin-debug 
         fi
         ;;
     libclang.dll)
+        if [ -z "$RELEASE_BUILD" ]; then
+            rm -f $i
+        fi
         ;;
     llvm-ar|llvm-cvtres|llvm-dlltool|llvm-nm|llvm-objdump|llvm-ranlib|llvm-rc|llvm-readobj|llvm-strings|llvm-pdbutil|llvm-objcopy|llvm-strip|llvm-cov|llvm-profdata|llvm-addr2line|llvm-symbolizer|llvm-wrapper|llvm-windres|llvm-ml|llvm-readelf|llvm-size|llvm-cxxfilt|llvm-lib)
         ;;
@@ -183,9 +186,16 @@ if [ -n "$RELEASE_BUILD" ]; then
     if [ -d zstd ]; then
         remove_with_log zstd
     fi
+else
+    rm -rf clang clang-c clang-tidy lld llvm llvm-c lldb
 fi
 cd ..
 cd lib
+if [ -z "$RELEASE_BUILD" ]; then
+    rm -f *.dll.a
+    rm -f libclang.so*
+    rm -f libclang.dylib*
+fi
 for i in lib*.a; do
     case $i in
     libclang.dll.a|libclang-cpp*|liblldb*|libLLVM-[0-9]*)
