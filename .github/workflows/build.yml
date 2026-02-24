@@ -76,19 +76,17 @@ jobs:
   linux-stage1:
     needs: [prepare]
     runs-on: ubuntu-latest
-    container: ubuntu:devel
     steps:
       - uses: actions/checkout@v6
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
       - name: Setup ccache
-        uses: jianmingyong/ccache-action@main
+        uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 800M
+          max-size: 500M
           sloppiness: time_macros,include_file_mtime,include_file_ctime
-          install: false
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
@@ -120,7 +118,6 @@ jobs:
   linux-profile:
     needs: [prepare, linux-stage1]
     runs-on: ubuntu-latest
-    container: ubuntu:devel
     steps:
       - uses: actions/checkout@v6
       - name: Install Dependencies
@@ -155,19 +152,17 @@ jobs:
   linux:
     needs: [prepare, linux-stage1, linux-profile]
     runs-on: ubuntu-latest
-    container: ubuntu:devel
     steps:
       - uses: actions/checkout@v6
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
       - name: Setup ccache
-        uses: jianmingyong/ccache-action@main
+        uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 1G
+          max-size: 900M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
-          install: false
       - uses: actions/download-artifact@v7
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -211,28 +206,17 @@ jobs:
   linux-cross-aarch64:
     needs: [linux-stage1, linux-profile, prepare]
     runs-on: ubuntu-latest
-    container:
-      image: ubuntu:devel
     steps:
-      - name: Install Docker
-        run: |
-          apt-get update -qq && apt-get install -qqy docker.io
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@master
-        with:
-          image: tonistiigi/binfmt
-          cache-image: false
       - uses: actions/checkout@v6
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
       - name: Setup ccache
-        uses: jianmingyong/ccache-action@main
+        uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
           max-size: 800M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
-          install: false
       - uses: actions/download-artifact@v7
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -251,7 +235,7 @@ jobs:
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
           COMPILER_LAUNCHER: ccache
         run: |
-          apt-get update -qq && apt-get install -qy g++-aarch64-linux-gnu
+          sudo apt-get update -qq && sudo apt-get install -qy g++-aarch64-linux-gnu
           ./build-all.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --no-runtimes --host=aarch64-linux-gnu --thinlto --pgo
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
       - name: Assemble the cross-built toolchain
@@ -259,7 +243,7 @@ jobs:
           ./prepare-cross-toolchain-unix.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw
       - name: Test using the cross-built assembled toolchain
         run: |
-          apt-get update -qq && apt-get install -qy qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross
+          sudo apt-get update -qq && sudo apt-get install -qy qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh $(pwd)/install/llvm-mingw
       - name: Package the toolchain
@@ -290,7 +274,6 @@ jobs:
     if: github.event_name == 'schedule'
     needs: [prepare]
     runs-on: ubuntu-latest
-    container: ubuntu:devel
     steps:
       - uses: actions/checkout@v6
       - name: Install Dependencies
@@ -324,16 +307,13 @@ jobs:
     steps:
       # - name: Setup mold
       #   run: brew install mold
-      - name: Setup Git Retry
-        run: git config --global http.retry 5
       - uses: actions/checkout@v6
       - name: Setup ccache
-        uses: jianmingyong/ccache-action@main
+        uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 800M
+          max-size: 450M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
-          install: false
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
@@ -342,7 +322,6 @@ jobs:
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
-          brew install ccache
           # Disable and python. This is available on the runners, but
           # installed with homebrew, and only available in the native (arm64)
           # form.
@@ -372,16 +351,13 @@ jobs:
     steps:
       # - name: Setup mold
       #   run: brew install mold
-      - name: Setup Git Retry
-        run: git config --global http.retry 5
       - uses: actions/checkout@v6
       - name: Setup ccache
-        uses: jianmingyong/ccache-action@main
+        uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
           max-size: 800M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
-          install: false
       - uses: actions/download-artifact@v7
         with:
           name: macos-llvm
@@ -402,7 +378,6 @@ jobs:
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
-          brew install ccache
           # Disable python. This is available on the runners, but
           # installed with homebrew, and only available in the native (arm64)
           # form. Therefore, autodetection will pick them up, but linking
@@ -451,7 +426,7 @@ jobs:
             ninja:p
       # - uses: rui314/setup-mold@v1
       # - name: Setup ccache
-      #   uses: jianmingyong/ccache-action@main
+      #   uses: llvm-latest/ccache-action@main
       #   with:
       #     ccache-key-prefix: ccache_${{ github.job }}-ucrt-msys2-${{ matrix.sys }}
       #     max-size: 800M
@@ -459,8 +434,6 @@ jobs:
       # - uses: MinoruSekine/setup-scoop@main
       #   with:
       #     apps: mold
-      - name: Setup Git Retry
-        run: git config --global http.retry 5
       - uses: actions/checkout@v6
       - name: Build
         env:
@@ -496,7 +469,6 @@ jobs:
   linux-cross-windows:
     needs: [linux-stage1, linux-profile, prepare]
     runs-on: ubuntu-latest
-    container: ubuntu:devel
     strategy:
       fail-fast: false
       matrix:
@@ -511,12 +483,11 @@ jobs:
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
       - name: Setup ccache
-        uses: jianmingyong/ccache-action@main
+        uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
           max-size: 800M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
-          install: false
       - uses: actions/download-artifact@v7
         with:
           name: linux-stage1-${{matrix.crt}}-x86_64-toolchain
@@ -549,8 +520,12 @@ jobs:
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
-          apt-get update -qq && apt-get install -qy libltdl-dev swig autoconf-archive
-          ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zstd --with-busybox --move-llvm --thinlto --pgo
+          sudo apt-get update -qq && sudo apt-get install -qy libltdl-dev swig autoconf-archive
+          if [ "${{matrix.arch}}" = "x86_64" ] && [ "${{matrix.crt}}" = "ucrt" ]; then
+            ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zstd --with-busybox --move-llvm --thinlto --pgo
+          else
+            ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zstd --with-busybox --thinlto --pgo
+          fi
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
       - name: Create archives
         env:
@@ -908,7 +883,7 @@ jobs:
           path: ffmpeg
       - name: Build ffmpeg
         run: |
-          apt-get update -qq && apt-get install -qy nasm
+          sudo apt-get update -qq && sudo apt-get install -qy nasm
           mkdir ffmpeg-build
           cd ffmpeg-build
           # Set a limit of 3 minutes per process/object file; with unproven
