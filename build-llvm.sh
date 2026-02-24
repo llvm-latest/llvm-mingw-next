@@ -19,7 +19,7 @@ set -e
 . ./logging.sh
 
 : ${LLVM_REPOSITORY:=https://github.com/llvm-latest/llvm-p2996.git}
-: ${LLVM_VERSION:=p2996}
+: ${LLVM_VERSION:=main}
 ASSERTS=OFF
 unset HOST
 BUILDDIR="build"
