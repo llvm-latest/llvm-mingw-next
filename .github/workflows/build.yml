@@ -605,14 +605,12 @@ jobs:
             const fs = require('fs');
             const files = fs.readdirSync('.').filter(file => file.endsWith('.7z'));
             for (const file of files) {
-              console.log(`Uploading ${file}...`);
               const uploadResponse = await artifact.uploadArtifact(
                 file,   // Name
                 [file], // Files
                 '.',    // Root Directory
                 { retentionDays: 7, compressionLevel: 0 }
               );
-              console.log(`Uploaded ${file} - ID: ${uploadResponse.id}`);
             }
 
   # Run llvm-mingw's tests with the cross-built toolchains from above.
