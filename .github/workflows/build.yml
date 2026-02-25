@@ -544,7 +544,8 @@ jobs:
             echo "Packaging llvm-mingw toolchains..."
             ROOT=$NAME
             PREFIX=windows-x86_64-llvm-mingw-$TAG-${{matrix.crt}}
-            COMPRESS="7z a -t7z -mx=6 -snl-"
+            # COMPRESS="7z a -t7z -mx=6 -snl-"
+            COMPRESS="7z a -t7z -mx=6"
             FILES=" \
               -x!$ROOT/bin/i686-* \
               -x!$ROOT/bin/arm64ec-* \
@@ -567,17 +568,19 @@ jobs:
             echo "Creating llvm-mingw for x86_64 target"
             eval $COMPRESS ../$PREFIX-tiny.7z $ROOT $FILES $X86_64_FILES
             echo ""
-            # x86_64 + LLVM
-            echo "Creating llvm-mingw for x86_64 target with LLVM dev libraries"
-            eval $COMPRESS ../$PREFIX-tiny+llvm.7z $ROOT $FILES $X86_64_FILES $LLVM_EXTRA_FILES
-            echo ""
             # x86_64 + aarch64
             echo "Creating llvm-mingw for x86_64 and aarch64 targets"
             eval $COMPRESS ../$PREFIX-tiny+aarch64.7z $ROOT $FILES
             echo ""
+
+            mv $LLVM_EXTRA_FILES/* $ROOT
+            # x86_64 + LLVM
+            echo "Creating llvm-mingw for x86_64 target with LLVM dev libraries"
+            eval $COMPRESS ../$PREFIX-tiny+llvm.7z $ROOT $FILES $X86_64_FILES
+            echo ""
             # x86_64 + aarch64 + LLVM
             echo "Creating llvm-mingw for x86_64 and aarch64 targets with LLVM dev libraries"
-            eval $COMPRESS ../$PREFIX-tiny+aarch64+llvm.7z $ROOT $FILES $LLVM_EXTRA_FILES
+            eval $COMPRESS ../$PREFIX-tiny+aarch64+llvm.7z $ROOT $FILES
             echo ""
             echo "Created Tiny Toolchains:"
             ls -lh ../*-llvm-mingw-*.7z
