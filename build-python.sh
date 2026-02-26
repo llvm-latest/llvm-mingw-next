@@ -187,10 +187,10 @@ NATIVE_PYTHON="$(command -v python3)"
     PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig" \
     --with-build-python="$NATIVE_PYTHON" \
     --enable-shared             \
-    --enable-optimizations      \
     --without-ensurepip         \
     --without-c-locale-coercion \
     --disable-test-modules
+    # --enable-optimizations      \
 
 $MAKE -j$CORES
 $MAKE install
