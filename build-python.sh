@@ -125,7 +125,7 @@ if [ -z "$HOST" ]; then
     cd $BUILDDIR
     ../configure --prefix="$PREFIX" \
         CFLAGS="-I$PREFIX/include" CXXFLAGS="-I$PREFIX/include" LDFLAGS="-L$PREFIX/lib $LDFLAGS" \
-        --with-lto \
+        --with-lto          \
         --without-ensurepip \
         --disable-test-modules
     $MAKE -j$CORES
@@ -187,6 +187,7 @@ NATIVE_PYTHON="$(command -v python3)"
     PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig" \
     --with-build-python="$NATIVE_PYTHON" \
     --enable-shared             \
+    --enable-optimizations      \
     --without-ensurepip         \
     --without-c-locale-coercion \
     --disable-test-modules

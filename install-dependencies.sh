@@ -41,7 +41,7 @@ sudo apt-fast install -y -o Dpkg::Use-Pty=0 \
     clang lld llvm gcc g++ make cmake ninja-build \
     python3 python3-pip nasm \
     autoconf automake autopoint libtool pkg-config \
-    zip unzip bzip2 xz-utils p7zip-full \
+    zip unzip bzip2 xz-utils p7zip-full 7zip \
     gettext less
 
 sudo apt-get clean -y
