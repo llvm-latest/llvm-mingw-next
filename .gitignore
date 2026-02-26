@@ -1,5 +1,6 @@
 /build
 /install
+/busybox-w32
 /llvm-project
 /mingw-w64
 /lldb-mi
@@ -8,6 +9,7 @@
 /cpython*
 /python-native
 /toolchain
+/zstd
 
 #==============================================================================#
 # Directories to ignore (do not add trailing '/'s, they skip symlinks).
