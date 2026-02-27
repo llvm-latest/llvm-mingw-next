@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
-        uses: dawidd6/action-download-artifact@v10
+        uses: dawidd6/action-download-artifact@v16
         with:
           workflow: build.yml
           workflow_conclusion: success
@@ -48,7 +48,9 @@ jobs:
           rm -rf msys2*
           rm -rf linux-stage1-*
           rm -rf macos-llvm*
-          mv *-toolchain/*.zip *-toolchain/*.tar.xz *-llvm-mingw-*/*.7z .
+          mv *-toolchain/*.tar.xz .
+          mv *-toolchain/*.zip .
+          mv *-llvm-mingw-*/*.7z .
       - name: Set environment
         run: |
           cat parameters/parameters.txt >> $GITHUB_ENV

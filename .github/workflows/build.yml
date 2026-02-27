@@ -545,7 +545,8 @@ jobs:
             echo "Packaging llvm-mingw tiny toolchains..."
             ROOT=$NAME
             PREFIX=windows-x86_64-llvm-mingw-$TAG-${{matrix.crt}}
-            COMPRESS="7z a -t7z -mx=6"
+            # COMPRESS="7z a -t7z -mx=6"       # follow symlinks
+            COMPRESS="7z a -t7z -mx=6 -snl-" # don't follow symlinks
             FILES=" \
               -x!$ROOT/bin/i686-* \
               -x!$ROOT/bin/arm64ec-* \
