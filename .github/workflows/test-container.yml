@@ -81,8 +81,32 @@ jobs:
                     '.',    // Root Directory
                     { compressionLevel: 0 }
                 );
-                core.info(`>>> Uploaded ${file} - ID: ${uploadResponse.id}`);
             }
+
+  # test-ccache-action:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Setup ccache
+  #       uses: llvm-latest/ccache-action@main
+  #       with:
+  #         ccache-key-prefix: ccache_${{ github.job }}
+  #     - name: Build
+  #       run: |
+  #         ccache -s
+  #         git clone --depth 1 https://github.com/facebook/zstd.git
+  #         cd zstd
+  #         mkdir build_release
+  #         cd build_release
+  #         cmake -G Ninja \
+  #           -DCMAKE_BUILD_TYPE=Release \
+  #           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+  #           -DZSTD_BUILD_PROGRAMS=OFF \
+  #           -DZSTD_BUILD_STATIC=ON \
+  #           -DZSTD_BUILD_SHARED=OFF \
+  #           -DBUILD_TESTING=OFF \
+  #           ..
+  #         cmake --build .
+  #         ccache -s
 
   linux-cross-aarch64:
     runs-on: ubuntu-latest
