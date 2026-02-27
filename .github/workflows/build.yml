@@ -545,8 +545,8 @@ jobs:
             echo "Packaging llvm-mingw tiny toolchains..."
             ROOT=$NAME
             PREFIX=windows-x86_64-llvm-mingw-$TAG-${{matrix.crt}}
-            # COMPRESS="7z a -t7z -mx=6"       # follow symlinks
-            COMPRESS="7z a -t7z -mx=6 -snl-" # don't follow symlinks
+            # COMPRESS="7z a -t7z -mx=6 -snl" # follow symlinks
+            COMPRESS="7z a -t7z -mx=6" # don't follow symlinks
             FILES=" \
               -x!$ROOT/bin/i686-* \
               -x!$ROOT/bin/arm64ec-* \
@@ -612,7 +612,7 @@ jobs:
             const files = fs.readdirSync('.').filter(file => file.endsWith('.7z'));
             for (const file of files) {
               const uploadResponse = await artifact.uploadArtifact(
-                file,   // Name
+                file.slice(0, -3), // Name
                 [file], // Files
                 '.',    // Root Directory
                 { retentionDays: 7, compressionLevel: 0 }
