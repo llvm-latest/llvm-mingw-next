@@ -86,7 +86,7 @@ jobs:
               prerelease="--prerelease"
           fi
           if ${{inputs.create_release}}; then
-              gh release create ${{inputs.tag}} --verify-tag $prerelease --title "${{inputs.title} ${{inputs.tag}}" --notes "" *.tar.xz *.zip *.7z -R ${{github.repository}}
+              gh release create ${{inputs.tag}} --verify-tag $prerelease --title "${{inputs.title}} ${{inputs.tag}}" --notes "" *.tar.xz *.zip *.7z -R ${{github.repository}}
           else
               gh release upload ${{inputs.tag}} *.tar.xz *.zip *.7z --clobber -R ${{github.repository}}
           fi
