@@ -629,6 +629,7 @@ jobs:
           - x86_64
           - i686
           - aarch64
+          - armv7
     runs-on: ${{startsWith(matrix.arch, 'a') && 'windows-11-arm' || 'windows-latest'}}
     steps:
       - uses: actions/download-artifact@v7
@@ -671,6 +672,7 @@ jobs:
           - { arch: x86_64,  target_arch: i686    }
           - { arch: x86_64,  target_arch: x86_64  }
           - { arch: aarch64, target_arch: aarch64 }
+          - { arch: aarch64, target_arch: armv7   }
     runs-on: ${{startsWith(matrix.arch, 'a') && 'windows-11-arm' || 'windows-latest'}}
     steps:
       - uses: actions/download-artifact@v7
@@ -794,6 +796,7 @@ jobs:
           - x86_64
           - i686
           - aarch64
+          - armv7
     runs-on: ${{startsWith(matrix.arch, 'a') && 'windows-11-arm' || 'windows-latest'}}
     steps:
       - uses: actions/download-artifact@v7

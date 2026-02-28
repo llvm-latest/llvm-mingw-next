@@ -16,6 +16,8 @@
 
 set -ex
 
+. ./logging.sh
+
 if [ $# -lt 1 ]; then
     echo $0 prefix
     exit 1

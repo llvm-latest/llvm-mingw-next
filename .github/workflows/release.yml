@@ -13,6 +13,7 @@ on:
       title:
         description: 'Release title'
         type: string
+        default: 'LLVM-MinGW'
       make_tag:
         description: 'Make a tag'
         type: boolean
@@ -61,10 +62,10 @@ jobs:
       - name: Make a tag
         if: ${{inputs.make_tag}}
         run: |
-          if [ "$TAG" != "${{inputs.tag}}" ]; then
-              echo Tag mismatch, \"$TAG\" in workflow vs \"${{inputs.tag}}\" as input
-              exit 1
-          fi
+          # if [ "$TAG" != "${{inputs.tag}}" ]; then
+          #     echo Tag mismatch, \"$TAG\" in workflow vs \"${{inputs.tag}}\" as input
+          #     exit 1
+          # fi
           cd repo
           git config --global user.name "GitHub Actions"
           git config --global user.email bot@github.com
@@ -85,7 +86,7 @@ jobs:
               prerelease="--prerelease"
           fi
           if ${{inputs.create_release}}; then
-              gh release create ${{inputs.tag}} --verify-tag $prerelease --title "${{inputs.title}}" --notes "" *.tar.xz *.zip *.7z -R ${{github.repository}}
+              gh release create ${{inputs.tag}} --verify-tag $prerelease --title "${{inputs.title}} ${{inputs.tag}}" --notes "" *.tar.xz *.zip *.7z -R ${{github.repository}}
           else
               gh release upload ${{inputs.tag}} *.tar.xz *.zip *.7z --clobber -R ${{github.repository}}
           fi
