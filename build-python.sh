@@ -158,9 +158,7 @@ else
     export CXX="$COMPILER_LAUNCHER $HOST-g++"
 fi
 # Use Clang-specific LTO flags with LLVM-MinGW
-# NOTE: configure error
-# LDFLAGS="$LDFLAGS -flto=full -ffat-lto-objects"
-LDFLAGS="$LDFLAGS -flto=full"
+LDFLAGS="$LDFLAGS -flto=full -ffat-lto-objects"
 
 cd libffi
 [ -z "$CLEAN" ] || rm -rf $BUILDDIR
