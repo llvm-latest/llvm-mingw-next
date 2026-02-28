@@ -14,9 +14,11 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-set -ex
+echo ==============================
+echo Testing libc++ module
+echo ==============================
 
-. ./logging.sh
+set -ex
 
 if [ $# -lt 1 ]; then
     echo $0 prefix
@@ -46,3 +48,9 @@ if [ -n "$NATIVE" ]; then
     # Test the unprefixed clang-scan-deps wrapper.
     clang-scan-deps -format=p1689 -- clang++ -std=c++23 -c test/test-scan-deps.cpp -DEXPECT_$(clang++ -dumpmachine | sed 's/-.*//')
 fi
+
+set +x
+
+echo ==============================
+echo All tests succeeded
+echo ==============================

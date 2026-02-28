@@ -14,9 +14,11 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-set -ex
+echo ==============================
+echo Running LLVM-MinGW tests
+echo ==============================
 
-. ./logging.sh
+set -ex
 
 if [ $# -lt 1 ]; then
     echo $0 dest
@@ -268,4 +270,9 @@ for arch in $ARCHS; do
     $MAKE -f ../Makefile ARCH=$arch HAVE_UWP=$HAVE_UWP HAVE_CFGUARD=$HAVE_CFGUARD HAVE_ASAN=$HAVE_ASAN HAVE_UBSAN=$HAVE_UBSAN HAVE_OPENMP=$HAVE_OPENMP NATIVE=$NATIVE RUNTIMES_SRC=$PREFIX/$arch-w64-mingw32/bin RUN="$RUN" $COPYARG $MAKEOPTS -j$CORES $TARGET
     cd ..
 done
+
+set +x
+
+echo ==============================
 echo All tests succeeded
+echo ==============================
