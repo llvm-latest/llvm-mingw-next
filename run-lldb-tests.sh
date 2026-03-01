@@ -14,9 +14,11 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-set -ex
+echo ==============================
+echo Running LLDB tests
+echo ==============================
 
-. ./logging.sh
+set -ex
 
 if [ $# -lt 1 ]; then
     echo $0 prefix
@@ -131,4 +133,9 @@ fi
 grep -q "exited with status = 0" $OUT
 
 rm -f $OUT $SCRIPT
+
+set +x
+
+echo ==============================
 echo All tests succeeded
+echo ==============================
