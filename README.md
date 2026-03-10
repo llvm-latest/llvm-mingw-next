@@ -11,11 +11,11 @@ __Add some missing features and several improvements.__
 - Use `mold` linker by default on Linux
 - Build LLVM gold plugin `LLVMgold.so` for Linux
 - Removed LLVM `NVPTX` target support
+- Windows/macOS: Enabled `zstd` support for LLVM
 - CI: Using the latest toolchains for building
 - CI: Support for speedup building using `ccache`
 - CI: Add logging to build scripts
 - CI: Add additional checks to prevent build failures caused by frequent GitHub cloud service outages or network fluctuations
-- Windows/macOS: Enabled `zstd` support for LLVM
 
 LLVM MinGW
 ==========
