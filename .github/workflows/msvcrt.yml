@@ -106,7 +106,7 @@ jobs:
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: linux-${{matrix.crt}}-x86_64-toolchain
       - name: Unpack cross toolchain
@@ -184,7 +184,7 @@ jobs:
           install: >-
             unzip
             make
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: windows-${{matrix.crt}}-${{matrix.arch}}-toolchain
       - name: Unpack toolchain
@@ -209,7 +209,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
       - name: Rearrange files
         run: |
           rm -rf linux-asserts*

@@ -113,8 +113,10 @@ if [ -z "$HOST" ]; then
     cd $BUILDDIR
     ../configure --prefix="$PREFIX" \
         LDFLAGS="$LDFLAGS" \
-        --disable-symvers \
-        --disable-docs
+        --disable-symvers  \
+        --disable-docs     \
+        --disable-shared   \
+        --with-pic
     $MAKE -j$CORES
     $MAKE install
     cd ../..
