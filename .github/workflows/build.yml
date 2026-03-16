@@ -124,7 +124,7 @@ jobs:
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
       - name: Unpack stage1 Clang
@@ -162,9 +162,9 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-x86_64-ucrt
-          max-size: 700M
+          max-size: 800M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
       - name: Unpack stage1 Clang
@@ -172,7 +172,7 @@ jobs:
           tar -Jxf llvm-mingw-*.tar.xz
           rm llvm-mingw-*.tar.xz
           mv llvm-mingw* /opt/llvm-mingw
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: profile
       - name: Build
@@ -218,7 +218,7 @@ jobs:
           ccache-key-prefix: ccache_${{ github.job }}-ucrt
           max-size: 800M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
       - name: Unpack stage1 Clang
@@ -226,7 +226,7 @@ jobs:
           tar -Jxf llvm-mingw-*.tar.xz
           rm llvm-mingw-*.tar.xz
           mv llvm-mingw* /opt/llvm-mingw
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: profile
       - name: Build
@@ -313,7 +313,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 450M
+          max-size: 500M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - name: Build
         env:
@@ -359,7 +359,7 @@ jobs:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
           max-size: 800M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: macos-llvm
       - name: Unpack stage1 Clang
@@ -367,7 +367,7 @@ jobs:
           tar -Jxf llvm-*.tar.xz
           rm llvm-*.tar.xz
           mv llvm* $HOME/llvm
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: profile
       - name: Build
@@ -489,7 +489,7 @@ jobs:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
           max-size: 800M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: linux-stage1-${{matrix.crt}}-x86_64-toolchain
       - name: Unpack cross toolchain
@@ -498,7 +498,7 @@ jobs:
           rm llvm-mingw-*.tar.xz
           mv llvm-mingw* /opt/llvm-mingw
           echo /opt/llvm-mingw/bin >> $GITHUB_PATH
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: profile
       - name: Cache downloads
@@ -631,7 +631,7 @@ jobs:
           - aarch64
     runs-on: ${{startsWith(matrix.arch, 'a') && 'windows-11-arm' || 'windows-latest'}}
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: windows-ucrt-${{matrix.arch}}-toolchain
       - name: Unpack toolchain
@@ -673,7 +673,7 @@ jobs:
           - { arch: aarch64, target_arch: aarch64 }
     runs-on: ${{startsWith(matrix.arch, 'a') && 'windows-11-arm' || 'windows-latest'}}
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: windows-ucrt-${{matrix.arch}}-toolchain
       - name: Unpack toolchain
@@ -732,7 +732,7 @@ jobs:
           - { arch: aarch64 }
     runs-on: ${{startsWith(matrix.arch, 'a') && 'windows-11-arm' || 'windows-latest'}}
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: windows-ucrt-${{matrix.arch}}-toolchain
       - name: Unpack toolchain
@@ -761,7 +761,7 @@ jobs:
             -DCMAKE_C_COMPILER=clang `
             -DCMAKE_CXX_COMPILER=clang++
           ninja not FileCheck
-          echo "TOOLS=$PWD\bin" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+          echo "TOOLS=$PWD" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
       - name: Build and test OpenMP
         run: |
           cd llvm-project
@@ -771,13 +771,13 @@ jobs:
             -G Ninja `
             -DCMAKE_BUILD_TYPE=Release `
             -DPython3_EXECUTABLE="$Env:PYTHON_EXE" `
-            -DOPENMP_LLVM_TOOLS_DIR="$Env:TOOLS" `
+            -DLLVM_BINARY_DIR="$Env:TOOLS" `
             -DCMAKE_C_COMPILER=clang `
             -DCMAKE_CXX_COMPILER=clang++ `
             -DCMAKE_ASM_MASM_COMPILER=llvm-ml `
             -DLLVM_ENABLE_RUNTIMES="openmp" `
             -DLIBOMP_ASMFLAGS=${{matrix.asmflag}} `
-            -DOPENMP_LIT_ARGS="-v --time-tests"
+            -DLLVM_LIT_ARGS="-v --time-tests"
           ninja
           ninja check-openmp
 
@@ -796,7 +796,7 @@ jobs:
           - aarch64
     runs-on: ${{startsWith(matrix.arch, 'a') && 'windows-11-arm' || 'windows-latest'}}
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: windows-ucrt-${{matrix.arch}}-toolchain
       - name: Unpack toolchain
@@ -874,7 +874,7 @@ jobs:
           - armv7
           - aarch64
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: linux-asserts-x86_64-toolchain
       - name: Unpack cross toolchain
@@ -928,7 +928,7 @@ jobs:
             diffutils
           pacboy: >-
             nasm:p
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: windows-ucrt-x86_64-toolchain
       - name: Unpack toolchain
@@ -961,7 +961,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
       - name: Rearrange files
         run: |
           rm -rf linux-asserts*
