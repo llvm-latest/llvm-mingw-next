@@ -244,7 +244,9 @@ jobs:
           ./prepare-cross-toolchain-unix.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw
       - name: Test using the cross-built assembled toolchain
         run: |
-          sudo apt-get update -qq && sudo apt-get install -qy qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross
+          sudo apt-get update -qq && sudo apt-get install -qy \
+            qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross \
+            zlib1g-dev:arm64 libzstd-dev:arm64
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh $(pwd)/install/llvm-mingw
       - name: Package the toolchain
@@ -326,7 +328,7 @@ jobs:
           # Disable and python. This is available on the runners, but
           # installed with homebrew, and only available in the native (arm64)
           # form.
-          LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ARCH=arm64 ./build-all.sh $(pwd)/install/llvm --stage1 --with-zstd --llvm-only
+          LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ARCH=arm64 ./build-all.sh $(pwd)/install/llvm --stage1 --with-zlib --with-zstd --llvm-only
           .github/workflows/store-version.sh install/llvm/versions.txt
           cd install
           NAME=llvm-$TAG-macos-$(uname -m)
@@ -384,7 +386,7 @@ jobs:
           # form. Therefore, autodetection will pick them up, but linking
           # universal binaries fails as this libraries is unavailable in the
           # other (x86_64) architecture form.
-          LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ARCH=${{matrix.arch}} ./build-all.sh $HOME/llvm $(pwd)/install/llvm-mingw --with-zstd --thinlto --pgo
+          LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ARCH=${{matrix.arch}} ./build-all.sh $HOME/llvm $(pwd)/install/llvm-mingw --with-zlib --with-zstd --thinlto --pgo
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
           ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           ./run-tests.sh $(pwd)/install/llvm-mingw
@@ -523,9 +525,9 @@ jobs:
         run: |
           sudo apt-get update -qq && sudo apt-get install -qy libltdl-dev swig autoconf-archive
           if [ "${{matrix.arch}}" = "x86_64" ] && [ "${{matrix.crt}}" = "ucrt" ]; then
-            ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zstd --with-busybox --move-llvm --thinlto --pgo
+            ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zlib --with-zstd --with-busybox --move-llvm --thinlto --pgo
           else
-            ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zstd --with-busybox --thinlto --pgo
+            ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zlib --with-zstd --with-busybox --thinlto --pgo
           fi
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
       - name: Create archives

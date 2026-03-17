@@ -181,8 +181,11 @@ rm -rf man/man1/scan-build*
 cd ..
 cd include
 remove_or_move lld
-# Removing zstd headers in release build
+# Removing zlib-ng/zstd headers in release build
 if [ -n "$RELEASE_BUILD" ]; then
+    if [ -d zlib-ng ]; then
+        remove_with_log zlib-ng
+    fi
     if [ -d zstd ]; then
         remove_with_log zstd
     fi
@@ -200,8 +203,8 @@ for i in lib*.a; do
     case $i in
     libclang.dll.a|libclang-cpp*|liblldb*|libLLVM-[0-9]*)
         ;;
-    libzstd*) # thirdparty libs
-        # Removing zstd libraries in release build
+    libz.*|libzstd*) # thirdparty libs
+        # Removing zlib-ng/zstd libraries in release build
         if [ -n "$RELEASE_BUILD" ]; then
             if [ -f $i ]; then
                 remove_with_log $i

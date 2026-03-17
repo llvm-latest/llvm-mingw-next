@@ -24,8 +24,11 @@ while [ $# -gt 0 ]; do
     --with-python)
         PYTHON=1
         ;;
+    --with-zlib)
+        WITH_ZLIB=1
+        ;;
     --with-zstd)
-        ZSTD=1
+        WITH_ZSTD=1
         ;;
     --with-busybox)
         BUSYBOX=1
@@ -100,14 +103,19 @@ if [ -n "$PYTHON" ]; then
     LLVM_ARGS="$LLVM_ARGS --with-python"
 fi
 
-if [ -n "$ZSTD" ]; then
+if [ -n "$WITH_ZLIB" ]; then
+    ./build-zlib.sh $PREFIX --host=$HOST
+    LLVM_ARGS="$LLVM_ARGS --with-zlib"
+fi
+
+if [ -n "$WITH_ZSTD" ]; then
     ./build-zstd.sh $PREFIX --host=$HOST
     LLVM_ARGS="$LLVM_ARGS --with-zstd"
 fi
 
 ./build-llvm.sh $PREFIX --host=$HOST $LLVM_ARGS
 if [ -z "$NO_LLDB" ] && [ -z "$NO_LLDB_MI" ]; then
-    ./build-lldb-mi.sh $PREFIX --host=$HOST ${ZSTD+--with-zstd}
+    ./build-lldb-mi.sh $PREFIX --host=$HOST ${WITH_ZLIB+--with-zlib} ${WITH_ZSTD+--with-zstd}
 fi
 if [ -z "$FULL_LLVM" ]; then
     ./strip-llvm.sh $PREFIX --host=$HOST ${MOVE_LLVM:+--move-llvm} --release-build

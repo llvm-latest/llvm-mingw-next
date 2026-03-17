@@ -42,6 +42,9 @@ while [ $# -gt 0 ]; do
     --with-python)
         WITH_PYTHON=1
         ;;
+    --with-zlib)
+        WITH_ZLIB=1
+        ;;
     --with-zstd)
         WITH_ZSTD=1
         ;;
@@ -210,6 +213,12 @@ if [ -z "$NO_TOOLS" ]; then
             ./build-python.sh $PREFIX $HOST_ARGS
             LLVM_ARGS="$LLVM_ARGS --with-python"
         fi
+
+        if [ -n "$WITH_ZLIB" ]; then
+            ./build-zlib.sh $PREFIX $HOST_ARGS
+            LLVM_ARGS="$LLVM_ARGS --with-zlib"
+        fi
+
         if [ -n "$WITH_ZSTD" ]; then
             ./build-zstd.sh $PREFIX $HOST_ARGS
             LLVM_ARGS="$LLVM_ARGS --with-zstd"
@@ -222,7 +231,7 @@ if [ -z "$NO_TOOLS" ]; then
             exit 0
         fi
         if [ -z "$NO_LLDB" ] && [ -z "$NO_LLDB_MI" ]; then
-            ./build-lldb-mi.sh $PREFIX $HOST_ARGS ${WITH_ZSTD+--with-zstd}
+            ./build-lldb-mi.sh $PREFIX $HOST_ARGS ${WITH_ZLIB+--with-zlib} ${WITH_ZSTD+--with-zstd}
         fi
         if [ -z "$FULL_LLVM" ]; then
             ./strip-llvm.sh $PREFIX $HOST_ARGS ${RELEASE_BUILD+--release-build}

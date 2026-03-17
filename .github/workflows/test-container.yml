@@ -18,13 +18,17 @@ jobs:
   install-latest-toolchains:
     runs-on: ubuntu-latest
     steps:
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   with:
+      #     detached: true
       - run: |
-          # echo "cat /etc/apt/apt-mirrors.txt"
-          # cat /etc/apt/apt-mirrors.txt
-          # echo "=================================="
-          # echo "cat /etc/apt/sources.list.d/ubuntu.sources"
-          # cat /etc/apt/sources.list.d/ubuntu.sources
-          # echo "=================================="
+          echo "cat /etc/apt/apt-mirrors.txt"
+          cat /etc/apt/apt-mirrors.txt
+          echo "=================================="
+          echo "cat /etc/apt/sources.list.d/ubuntu.sources"
+          cat /etc/apt/sources.list.d/ubuntu.sources
+          echo "=================================="
           # sudo sed -i 's/noble/devel/g' /etc/apt/sources.list.d/ubuntu.sources
           # cat /etc/apt/sources.list.d/ubuntu.sources
 
@@ -32,24 +36,17 @@ jobs:
           sudo rm -rf /etc/apt/sources.list.d
           sudo tee /etc/apt/sources.list > /dev/null <<EOF
           deb https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
-          # deb-src https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
-
           deb https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
-          # deb-src https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
-
           deb https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
-          # deb-src https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
-
           deb https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
-          # deb-src https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
-
           deb https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
-          # deb-src https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
           EOF
       - run: |
           sudo add-apt-repository ppa:apt-fast/stable
-          sudo apt-get update -qq && sudo apt-get install -qqy -o Dpkg::Use-Pty=0 apt-fast
+          sudo apt-get update -qq
+          sudo apt-get install -qqy -o Dpkg::Use-Pty=0 apt-fast
           sudo apt-fast install -qqy -o Dpkg::Use-Pty=0 gcc g++ clang
+          # sudo apt-fast install -qqy -o Dpkg::Use-Pty=0 zlib1g-dev:arm64 libzstd-dev:arm64
           echo "=================================="
           ls -lL --time-style=full-iso /usr/bin/gcc
           gcc --version
@@ -59,6 +56,10 @@ jobs:
           echo "=================================="
           ls -lL --time-style=full-iso /usr/bin/clang
           clang --version
+          # echo "=================================="
+          # ls -lL --time-style=full-iso /usr/lib/aarch64-linux-gnu/libz.*
+          # echo "=================================="
+          # ls -lL --time-style=full-iso /usr/lib/aarch64-linux-gnu/libzstd.*
 
   upload-multiple-artifacts-at-once:
     runs-on: ubuntu-latest
