@@ -244,7 +244,9 @@ jobs:
           ./prepare-cross-toolchain-unix.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw
       - name: Test using the cross-built assembled toolchain
         run: |
-          sudo apt-get update -qq && sudo apt-get install -qy qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross
+          sudo apt-get update -qq && sudo apt-get install -qy \
+            qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross \
+            zlib1g-dev:arm64 libzstd-dev:arm64
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh $(pwd)/install/llvm-mingw
       - name: Package the toolchain

@@ -42,6 +42,7 @@ sudo apt-fast install -y -o Dpkg::Use-Pty=0 \
     python3 python3-pip nasm \
     autoconf automake autopoint libtool pkg-config \
     zip unzip bzip2 xz-utils p7zip-full 7zip \
+    zlib1g-dev libzstd-dev \
     gettext less
 
 sudo apt-get clean -y
