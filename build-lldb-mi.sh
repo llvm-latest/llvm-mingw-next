@@ -171,7 +171,7 @@ if [ "$(uname)" = "Darwin" ]; then
 fi
 
 if [ -n "$WITH_ZLIB" ]; then
-    # TODO: LLVM not supprot static linking with zlib
+    echo "TODO: LLVM not supprot static linking with zlib"
     # CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_ZLIB=FORCE_ON"
     # ZLIB_INCLUDE_DIR="$PREFIX/include/zlib-ng"
     # ZLIB_LIB="$PREFIX/lib/libz.a"
