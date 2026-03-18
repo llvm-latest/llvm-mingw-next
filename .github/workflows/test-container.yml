@@ -15,6 +15,47 @@ env:
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
+  test-linux-cross-aarch64:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
+      - uses: actions/checkout@v6
+      - name: Install Dependencies
+        run: ./install-dependencies.sh --with-arm64
+      - uses: rui314/setup-mold@v1
+      - name: Setup stage1 Clang
+        run: |
+          LLVM_MINGW_VER=20260311
+          curl -LO "https://github.com/mstorsjo/llvm-mingw/releases/download/$LLVM_MINGW_VER/llvm-mingw-$LLVM_MINGW_VER-ucrt-ubuntu-22.04-x86_64.tar.xz"
+          tar -Jxf llvm-mingw-*.tar.xz
+          rm llvm-mingw-*.tar.xz
+          mv llvm-mingw* /opt/llvm-mingw
+      - name: Download profile
+        uses: dawidd6/action-download-artifact@v18
+        with:
+          workflow: build.yml
+          workflow_conclusion: success
+          ref: ${{github.event_name == 'workflow_dispatch' && inputs.ref || 'master'}}
+          event: ${{github.event_name == 'workflow_dispatch' && 'push' || 'schedule'}}
+          name: profile
+      - name: Build
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -qy g++-aarch64-linux-gnu
+          ./build-all.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --no-runtimes --host=aarch64-linux-gnu --thinlto --pgo
+      - name: Assemble the cross-built toolchain
+        run: |
+          ./prepare-cross-toolchain-unix.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw
+      - name: Test using the cross-built assembled toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qy qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross
+          QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
+          QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh $(pwd)/install/llvm-mingw
+
   install-latest-toolchains:
     runs-on: ubuntu-latest
     steps:

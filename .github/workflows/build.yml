@@ -86,7 +86,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 500M
+          max-size: 600M
           sloppiness: time_macros,include_file_mtime,include_file_ctime
       - name: Build
         env:
@@ -162,7 +162,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-x86_64-ucrt
-          max-size: 800M
+          max-size: 900M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
@@ -216,7 +216,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-ucrt
-          max-size: 800M
+          max-size: 900M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
@@ -314,7 +314,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 500M
+          max-size: 600M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - name: Build
         env:
@@ -358,7 +358,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
-          max-size: 800M
+          max-size: 900M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
@@ -431,7 +431,7 @@ jobs:
       #   uses: llvm-latest/ccache-action@main
       #   with:
       #     ccache-key-prefix: ccache_${{ github.job }}-ucrt-msys2-${{ matrix.sys }}
-      #     max-size: 800M
+      #     max-size: 900M
       #     sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       # - uses: MinoruSekine/setup-scoop@main
       #   with:
@@ -488,7 +488,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
-          max-size: 800M
+          max-size: 900M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
