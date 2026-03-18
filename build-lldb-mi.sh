@@ -18,14 +18,21 @@ set -e
 
 . ./logging.sh
 
-: ${LLDB_MI_VERSION:=f1fea743bf06a99b6e7f74085bd8c8db47999df5}
+: ${LLDB_MI_VERSION:=main}
 BUILDDIR=build
 unset HOST
+
+if [ "$(uname)" != "Darwin" ]; then
+    WITH_CLANG=1
+fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
     --host=*)
         HOST="${1#*=}"
+        ;;
+    --with-clang)
+        WITH_CLANG=1
         ;;
     --with-zlib)
         WITH_ZLIB=1
@@ -115,8 +122,21 @@ if [ -n "$HOST" ]; then
     ARCH="${HOST%%-*}"
     BUILDDIR=$BUILDDIR-$HOST
 
-    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER=$HOST-gcc"
-    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER=$HOST-g++"
+    if [ -n "$WITH_CLANG" ]; then
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER=clang"
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER=clang++"
+        CMAKEFLAGS="$CMAKEFLAGS -DLLVM_USE_LINKER=${USE_LINKER:-lld}"
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_ASM_COMPILER_TARGET=$HOST"
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER_TARGET=$HOST"
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER_TARGET=$HOST"
+        if command -v $HOST-strip >/dev/null; then
+            CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_STRIP=$(command -v $HOST-strip)"
+        fi
+    else
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER=$HOST-gcc"
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER=$HOST-g++"
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_SYSTEM_PROCESSOR=$ARCH"
+    fi
     case $HOST in
     *-mingw32)
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_SYSTEM_NAME=Windows"
