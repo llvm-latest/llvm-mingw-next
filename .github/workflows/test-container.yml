@@ -22,7 +22,9 @@ jobs:
       #   uses: mxschmitt/action-tmate@v3
       #   with:
       #     detached: true
-      - run: |
+      - name: Setup apt sources
+        run: |
+          echo "=================================="
           echo "cat /etc/apt/apt-mirrors.txt"
           cat /etc/apt/apt-mirrors.txt
           echo "=================================="
@@ -35,31 +37,47 @@ jobs:
           sudo rm -rf /etc/apt/apt-mirrors.txt
           sudo rm -rf /etc/apt/sources.list.d
           sudo tee /etc/apt/sources.list > /dev/null <<EOF
-          deb https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
-          deb https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
-          deb https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
-          deb https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
-          deb https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
+          deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
+          deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
+          deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
+          deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
+          deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
+          deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel main restricted universe multiverse
+          deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-backports main restricted universe multiverse
+          deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-proposed main restricted universe multiverse
+          deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-security main restricted universe multiverse
+          deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-updates main restricted universe multiverse
           EOF
-      - run: |
-          sudo add-apt-repository ppa:apt-fast/stable
+      - name: Install toolchains
+        run: |
+          sudo dpkg --add-architecture arm64
           sudo apt-get update -qq
-          sudo apt-get install -qqy -o Dpkg::Use-Pty=0 apt-fast
-          sudo apt-fast install -qqy -o Dpkg::Use-Pty=0 gcc g++ clang
-          # sudo apt-fast install -qqy -o Dpkg::Use-Pty=0 zlib1g-dev:arm64 libzstd-dev:arm64
+          sudo apt-get install -qqy -o Dpkg::Use-Pty=0 \
+            lsd \
+            gcc g++ clang \
+            zlib1g-dev:arm64 libzstd-dev:arm64
+      - name: Verify toolchains
+        run: |
           echo "=================================="
-          ls -lL --time-style=full-iso /usr/bin/gcc
+          lsd -lL /usr/bin/gcc
           gcc --version
           echo "=================================="
-          ls -lL --time-style=full-iso /usr/bin/g++
+          gcc -v
+          echo
+          echo "=================================="
+          lsd -lL /usr/bin/g++
           g++ --version
           echo "=================================="
-          ls -lL --time-style=full-iso /usr/bin/clang
+          g++ -v
+          echo
+          echo "=================================="
+          lsd -lL /usr/bin/clang
           clang --version
-          # echo "=================================="
-          # ls -lL --time-style=full-iso /usr/lib/aarch64-linux-gnu/libz.*
-          # echo "=================================="
-          # ls -lL --time-style=full-iso /usr/lib/aarch64-linux-gnu/libzstd.*
+          echo
+          echo "=================================="
+          lsd -l /usr/lib/aarch64-linux-gnu/libz.*
+          echo "=================================="
+          lsd -l /usr/lib/aarch64-linux-gnu/libzstd.*
 
   upload-multiple-artifacts-at-once:
     runs-on: ubuntu-latest

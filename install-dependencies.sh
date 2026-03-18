@@ -2,26 +2,45 @@
 
 set -e
 
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --with-arm64)
+        WITH_ARM64=1
+        ;;
+    *)
+        echo Unrecognized parameter $1
+        exit 1
+        ;;
+    esac
+    shift
+done
+
 if [ "$CI" = "true" ]; then
     sudo rm -rf /etc/apt/apt-mirrors.txt
     sudo rm -rf /etc/apt/sources.list.d
 
-    sudo tee /etc/apt/sources.list > /dev/null <<EOF
-deb https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
-# deb-src https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
-
-deb https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
-# deb-src https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
-
-deb https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
-# deb-src https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
-
-deb https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
-# deb-src https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
-
-deb https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
-# deb-src https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
+    if [ -n "$WITH_ARM64" ]; then
+        sudo tee /etc/apt/sources.list > /dev/null <<EOF
+deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
+deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
+deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
+deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
+deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
+deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel main restricted universe multiverse
+deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-backports main restricted universe multiverse
+deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-proposed main restricted universe multiverse
+deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-security main restricted universe multiverse
+deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-updates main restricted universe multiverse
 EOF
+    else
+        sudo tee /etc/apt/sources.list > /dev/null <<EOF
+deb https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
+deb https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
+deb https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
+deb https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
+deb https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
+EOF
+    fi
 fi
 
 # Install apt-fast
@@ -44,6 +63,14 @@ sudo apt-fast install -y -o Dpkg::Use-Pty=0 \
     zip unzip bzip2 xz-utils p7zip-full 7zip \
     zlib1g-dev libzstd-dev \
     gettext less
+
+# Install arm64 dependencies
+if [ -n "$WITH_ARM64" ]; then
+sudo dpkg --add-architecture arm64
+sudo apt-fast install -y -o Dpkg::Use-Pty=0 \
+    binutils-dev:arm64 \
+    zlib1g-dev:arm64 libzstd-dev:arm64
+fi
 
 sudo apt-get clean -y
 
