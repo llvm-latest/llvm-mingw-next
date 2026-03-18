@@ -43,6 +43,10 @@ EOF
     fi
 fi
 
+if [ -n "$WITH_ARM64" ]; then
+    sudo dpkg --add-architecture arm64
+fi
+
 # Install apt-fast
 if [ -f /.dockerenv ] || grep -q 'docker\|lxc' /proc/1/cgroup 2>/dev/null; then
     sudo apt-get update -qq
@@ -66,7 +70,6 @@ sudo apt-fast install -y -o Dpkg::Use-Pty=0 \
 
 # Install arm64 dependencies
 if [ -n "$WITH_ARM64" ]; then
-sudo dpkg --add-architecture arm64
 sudo apt-fast install -y -o Dpkg::Use-Pty=0 \
     binutils-dev:arm64 \
     zlib1g-dev:arm64 libzstd-dev:arm64

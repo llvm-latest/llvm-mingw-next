@@ -244,6 +244,9 @@ if [ -n "$HOST" ] && [ "$(uname)" != "Darwin" ]; then
         ;;
     *-linux*)
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_SYSTEM_NAME=Linux"
+        if [ -n "$ARCH" == "aarch64" ]; then
+            LINUX_CROSS_AARCH64=1
+        fi
         ;;
     *)
         echo "Unrecognized host $HOST"
@@ -321,12 +324,17 @@ if [ -n "$WITH_ZLIB" ]; then
     CMAKEFLAGS="$CMAKEFLAGS -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR"
     CMAKEFLAGS="$CMAKEFLAGS -DZLIB_LIBRARY=$ZLIB_LIB"
     # add custom zlib-ng include path to CFLAGS and CXXFLAGS
-    if [ "$(uname)" != "Darwin" ]; then
-        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_FLAGS=\"\${CMAKE_C_FLAGS} -isystem $ZLIB_INCLUDE_DIR\""
-        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_FLAGS=\"\${CMAKE_CXX_FLAGS} -isystem $ZLIB_INCLUDE_DIR\""
-    fi
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_FLAGS=\"\${CMAKE_C_FLAGS} -I$ZLIB_INCLUDE_DIR\""
+    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_FLAGS=\"\${CMAKE_CXX_FLAGS} -I$ZLIB_INCLUDE_DIR\""
 else
     CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_ZLIB=FORCE_ON"
+
+    if [ -n "$LINUX_CROSS_AARCH64" ]; then
+        ZLIB_INCLUDE_DIR="/usr/include"
+        ZLIB_LIB="/usr/lib/aarch64-linux-gnu/libz.so"
+        CMAKEFLAGS="$CMAKEFLAGS -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR"
+        CMAKEFLAGS="$CMAKEFLAGS -DZLIB_LIBRARY=$ZLIB_LIB"
+    fi
 fi
 
 if [ -n "$WITH_ZSTD" ]; then
@@ -338,6 +346,13 @@ if [ -n "$WITH_ZSTD" ]; then
     CMAKEFLAGS="$CMAKEFLAGS -Dzstd_LIBRARY=$ZSTD_LIB"
 else
     CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_ZSTD=FORCE_ON"
+
+    if [ -n "$LINUX_CROSS_AARCH64" ]; then
+        ZSTD_INCLUDE_DIR="/usr/include"
+        ZSTD_LIB="/usr/lib/aarch64-linux-gnu/libzstd.so"
+        CMAKEFLAGS="$CMAKEFLAGS -Dzstd_INCLUDE_DIR=$ZSTD_INCLUDE_DIR"
+        CMAKEFLAGS="$CMAKEFLAGS -Dzstd_LIBRARY=$ZSTD_LIB"
+    fi
 fi
 
 if [ -n "$COMPILER_LAUNCHER" ]; then
