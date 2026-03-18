@@ -63,17 +63,17 @@ jobs:
           gcc --version
           echo "=================================="
           gcc -v
-
+          echo
           echo "=================================="
           lsd -lL /usr/bin/g++
           g++ --version
           echo "=================================="
           g++ -v
-
+          echo
           echo "=================================="
           lsd -lL /usr/bin/clang
           clang --version
-
+          echo
           echo "=================================="
           lsd -l /usr/lib/aarch64-linux-gnu/libz.*
           echo "=================================="
