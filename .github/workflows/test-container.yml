@@ -53,21 +53,31 @@ jobs:
           sudo dpkg --add-architecture arm64
           sudo apt-get update -qq
           sudo apt-get install -qqy -o Dpkg::Use-Pty=0 \
+            lsd \
             gcc g++ clang \
             zlib1g-dev:arm64 libzstd-dev:arm64
+      - name: Verify toolchains
+        run: |
           echo "=================================="
-          ls -lL --time-style=full-iso /usr/bin/gcc
+          lsd -lL /usr/bin/gcc
           gcc --version
           echo "=================================="
-          ls -lL --time-style=full-iso /usr/bin/g++
+          gcc -v
+
+          echo "=================================="
+          lsd -lL /usr/bin/g++
           g++ --version
           echo "=================================="
-          ls -lL --time-style=full-iso /usr/bin/clang
+          g++ -v
+
+          echo "=================================="
+          lsd -lL /usr/bin/clang
           clang --version
+
           echo "=================================="
-          ls -lL --time-style=full-iso /usr/lib/aarch64-linux-gnu/libz.*
+          lsd -l /usr/lib/aarch64-linux-gnu/libz.*
           echo "=================================="
-          ls -lL --time-style=full-iso /usr/lib/aarch64-linux-gnu/libzstd.*
+          lsd -l /usr/lib/aarch64-linux-gnu/libzstd.*
 
   upload-multiple-artifacts-at-once:
     runs-on: ubuntu-latest
