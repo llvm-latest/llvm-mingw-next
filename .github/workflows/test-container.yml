@@ -96,12 +96,11 @@ jobs:
           ./build-all.sh /opt/llvm-mingw --host=aarch64-linux-gnu --no-runtimes --llvm-only
       - name: Assemble the cross-built toolchain
         run: |
+          sudo apt-get install -qy qemu-user-binfmt
           ./prepare-cross-toolchain-unix.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw
       - name: Test using the cross-built assembled toolchain
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -qy qemu-user-binfmt qemu-user-binfmt-hwe \
-            libc6-arm64-cross libstdc++6-arm64-cross
+          sudo apt-get install -qy libc6-arm64-cross libstdc++6-arm64-cross
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh $(pwd)/install/llvm-mingw
 
@@ -226,6 +225,6 @@ jobs:
           rm llvm-mingw-*.tar.xz
           mv llvm-mingw* /opt/llvm-mingw
 
-          apt-get install -qqy qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross > /dev/null
+          apt-get install -qqy qemu-user-binfmt libc6-arm64-cross libstdc++6-arm64-cross
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh /opt/llvm-mingw
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh /opt/llvm-mingw
