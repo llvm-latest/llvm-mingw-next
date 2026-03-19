@@ -323,8 +323,10 @@ if [ -n "$WITH_ZLIB" ]; then
     ZLIB_LIB="$PREFIX/lib/libz.a"
     CMAKEFLAGS="$CMAKEFLAGS -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR"
     CMAKEFLAGS="$CMAKEFLAGS -DZLIB_LIBRARY=$ZLIB_LIB"
-    # add custom zlib-ng include path to CFLAGS and CXXFLAGS
-    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_INCLUDE_PATH=$ZLIB_INCLUDE_DIR"
+    # Fix not found zlib-ng include path
+    if [ "$(uname)" = "Linux" ] && [ -n "$TARGET_WINDOWS" ]; then
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_FLAGS=-I$ZLIB_INCLUDE_DIR"
+    fi
 else
     CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_ZLIB=FORCE_ON"
 
