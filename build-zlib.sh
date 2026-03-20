@@ -126,6 +126,7 @@ cd build$CROSS_NAME
 cmake \
     ${CMAKE_GENERATOR+-G} "$CMAKE_GENERATOR" \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_FLAGS="-fvisibility=hidden -fvisibility-inlines-hidden" \
     -DZLIB_COMPAT=ON \
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_TESTING=OFF \
