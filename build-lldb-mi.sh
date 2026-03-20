@@ -142,7 +142,7 @@ if [ -n "$HOST" ]; then
         ;;
     *-linux*)
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_SYSTEM_NAME=Linux"
-        if [ "$ARCH" = "aarch64" ]; then
+        if [ "$(uname -m)" != "$ARCH" ] && [ "$ARCH" = "aarch64" ]; then
             LINUX_CROSS_AARCH64=1
         fi
         ;;
