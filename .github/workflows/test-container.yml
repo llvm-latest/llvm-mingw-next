@@ -31,19 +31,25 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { arch: i686, crt: ucrt }
-          - { arch: x86_64, crt: ucrt }
-          - { arch: armv7, crt: ucrt }
+          # - { arch: i686, crt: ucrt }
+          # - { arch: x86_64, crt: ucrt }
+          # - { arch: armv7, crt: ucrt }
           - { arch: aarch64, crt: ucrt }
     steps:
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        with:
-          detached: true
+        # with:
+        #   detached: true
       - uses: actions/checkout@v6
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
+      # - name: Setup ccache
+      #   uses: llvm-latest/ccache-action@main
+      #   with:
+      #     ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
+      #     max-size: 500M
+      #     sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - name: Setup Debug Tools
         run: |
           sudo apt-get -qy install bat lsd fd-find btop
@@ -61,6 +67,7 @@ jobs:
         env:
           COMPILER_LAUNCHER: ccache
         run: |
+          # testing build for linking lld.exe issues on armv7 and aarch64
           sudo apt-get update -qq && sudo apt-get install -qy ccache libltdl-dev swig autoconf-archive
           ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-zlib --with-zstd
 
