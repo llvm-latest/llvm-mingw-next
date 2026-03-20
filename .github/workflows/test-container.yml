@@ -36,11 +36,11 @@ jobs:
           # - { arch: armv7, crt: ucrt }
           - { arch: aarch64, crt: ucrt }
     steps:
+      - uses: actions/checkout@v6
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        # with:
-        #   detached: true
-      - uses: actions/checkout@v6
+        with:
+          detached: true
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
@@ -75,11 +75,11 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && inputs.enable_linux_cross_aarch64
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         with:
           detached: true
-      - uses: actions/checkout@v6
       - name: Install Dependencies
         run: ./install-dependencies.sh --with-arm64
       - uses: rui314/setup-mold@v1
