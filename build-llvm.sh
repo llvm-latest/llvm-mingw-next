@@ -245,7 +245,7 @@ if [ -n "$HOST" ] && [ "$(uname)" != "Darwin" ]; then
         ;;
     *-linux*)
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_SYSTEM_NAME=Linux"
-        if [ -n "$ARCH" = "aarch64" ]; then
+        if [ "$(uname -m)" != "$ARCH" ] && [ "$ARCH" = "aarch64" ]; then
             LINUX_CROSS_AARCH64=1
         fi
         ;;
@@ -324,8 +324,19 @@ if [ -n "$WITH_ZLIB" ]; then
     ZLIB_LIB="$PREFIX/lib/libz.a"
     CMAKEFLAGS="$CMAKEFLAGS -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR"
     CMAKEFLAGS="$CMAKEFLAGS -DZLIB_LIBRARY=$ZLIB_LIB"
-    # add custom zlib-ng include path to CFLAGS and CXXFLAGS
-    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_INCLUDE_PATH=$ZLIB_INCLUDE_DIR"
+    # Fix not found zlib-ng include path
+    if [ "$(uname)" = "Linux" ] && [ -n "$TARGET_WINDOWS" ]; then
+        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_FLAGS=-I$ZLIB_INCLUDE_DIR"
+        # Fix symbol duplication error in zlib-ng
+        #
+        # ld.lld: error: duplicate symbol: crc32_copy_chorba
+        # >>> defined at libz.a(crc32_chorba_c.c.obj)
+        # >>> defined at libLLVM-23.dll.a(libLLVM-23.dll)
+        if [ "$ARCH" = "armv7" ] || [ "$ARCH" = "aarch64" ]; then
+            # Temporary fix for lld.exe linking failure on armv7 and aarch64
+            CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_EXE_LINKER_FLAGS=-Wl,--allow-multiple-definition"
+        fi
+    fi
 else
     CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_ZLIB=FORCE_ON"
 

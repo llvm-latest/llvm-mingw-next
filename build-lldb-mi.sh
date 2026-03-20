@@ -125,7 +125,6 @@ if [ -n "$HOST" ]; then
     if [ -n "$WITH_CLANG" ]; then
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER=clang"
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER=clang++"
-        CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_ASM_COMPILER_TARGET=$HOST"
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER_TARGET=$HOST"
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER_TARGET=$HOST"
         if command -v $HOST-strip >/dev/null; then
@@ -143,7 +142,7 @@ if [ -n "$HOST" ]; then
         ;;
     *-linux*)
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_SYSTEM_NAME=Linux"
-        if [ -n "$ARCH" = "aarch64" ]; then
+        if [ "$ARCH" = "aarch64" ]; then
             LINUX_CROSS_AARCH64=1
         fi
         ;;
@@ -199,8 +198,10 @@ if [ -n "$WITH_ZLIB" ]; then
     ZLIB_LIB="$PREFIX/lib/libz.a"
     CMAKEFLAGS="$CMAKEFLAGS -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR"
     CMAKEFLAGS="$CMAKEFLAGS -DZLIB_LIBRARY=$ZLIB_LIB"
-    # add custom zlib-ng include path to CFLAGS and CXXFLAGS
-    CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_INCLUDE_PATH=$ZLIB_INCLUDE_DIR"
+    # Fix not found zlib-ng include path
+    # if [ "$(uname)" = "Linux" ] && [ -n "$TARGET_WINDOWS" ]; then
+    #     CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_FLAGS=-I$ZLIB_INCLUDE_DIR"
+    # fi
 else
     CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_ZLIB=FORCE_ON"
 

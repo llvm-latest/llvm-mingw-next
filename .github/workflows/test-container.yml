@@ -6,6 +6,15 @@ on:
     paths:
       - ".github/workflows/test-container.yml"
   workflow_dispatch:
+    inputs:
+      enable_linux_cross_windows:
+        description: 'Enable linux cross windows build'
+        type: boolean
+        default: false
+      enable_linux_cross_aarch64:
+        description: 'Enable linux cross aarch64 build'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -15,8 +24,48 @@ env:
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
+  test-linux-cross-windows:
+    if: github.event_name == 'workflow_dispatch' && inputs.enable_linux_cross_windows
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: i686, crt: ucrt }
+          - { arch: x86_64, crt: ucrt }
+          - { arch: armv7, crt: ucrt }
+          - { arch: aarch64, crt: ucrt }
+    steps:
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
+      - uses: actions/checkout@v6
+      - name: Install Dependencies
+        run: ./install-dependencies.sh
+      - uses: rui314/setup-mold@v1
+      - name: Setup Debug Tools
+        run: |
+          sudo apt-get -qy install bat lsd fd-find btop
+          sudo ln -s /usr/bin/batcat /usr/bin/bat
+          sudo ln -s /usr/bin/fdfind /usr/bin/fd
+      - name: Setup LLVM-MinGW
+        run: |
+          LLVM_MINGW_VER=20260311
+          curl -LO "https://github.com/mstorsjo/llvm-mingw/releases/download/$LLVM_MINGW_VER/llvm-mingw-$LLVM_MINGW_VER-ucrt-ubuntu-22.04-x86_64.tar.xz"
+          tar -Jxf llvm-mingw-*.tar.xz
+          rm llvm-mingw-*.tar.xz
+          mv llvm-mingw* /opt/llvm-mingw
+          echo /opt/llvm-mingw/bin >> $GITHUB_PATH
+      - name: Build
+        env:
+          COMPILER_LAUNCHER: ccache
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -qy ccache libltdl-dev swig autoconf-archive
+          ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-zlib --with-zstd
+
   test-linux-cross-aarch64:
-    if: false
+    if: github.event_name == 'workflow_dispatch' && inputs.enable_linux_cross_aarch64
     runs-on: ubuntu-latest
     steps:
       - name: Setup tmate session
@@ -27,32 +76,31 @@ jobs:
       - name: Install Dependencies
         run: ./install-dependencies.sh --with-arm64
       - uses: rui314/setup-mold@v1
-      - name: Setup stage1 Clang
+      - name: Setup Debug Tools
+        run: |
+          sudo apt-get -qy install bat lsd fd-find btop
+          sudo ln -s /usr/bin/batcat /usr/bin/bat
+          sudo ln -s /usr/bin/fdfind /usr/bin/fd
+      - name: Setup LLVM-MinGW
         run: |
           LLVM_MINGW_VER=20260311
           curl -LO "https://github.com/mstorsjo/llvm-mingw/releases/download/$LLVM_MINGW_VER/llvm-mingw-$LLVM_MINGW_VER-ucrt-ubuntu-22.04-x86_64.tar.xz"
           tar -Jxf llvm-mingw-*.tar.xz
           rm llvm-mingw-*.tar.xz
           mv llvm-mingw* /opt/llvm-mingw
-      - name: Download profile
-        uses: dawidd6/action-download-artifact@v18
-        with:
-          workflow: build.yml
-          workflow_conclusion: success
-          ref: ${{github.event_name == 'workflow_dispatch' && inputs.ref || 'master'}}
-          event: ${{github.event_name == 'workflow_dispatch' && 'push' || 'schedule'}}
-          name: profile
       - name: Build
+        env:
+          COMPILER_LAUNCHER: ccache
         run: |
-          sudo apt-get update -qq && sudo apt-get install -qy g++-aarch64-linux-gnu
-          ./build-all.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --no-runtimes --host=aarch64-linux-gnu --thinlto --pgo
+          sudo apt-get update -qq && sudo apt-get install -qy ccache g++-aarch64-linux-gnu
+          ./build-all.sh /opt/llvm-mingw --host=aarch64-linux-gnu --no-runtimes --llvm-only
       - name: Assemble the cross-built toolchain
         run: |
+          sudo apt-get install -qy qemu-user-binfmt
           ./prepare-cross-toolchain-unix.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw
       - name: Test using the cross-built assembled toolchain
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -qy qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross
+          sudo apt-get install -qy libc6-arm64-cross libstdc++6-arm64-cross
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh $(pwd)/install/llvm-mingw
 
@@ -65,6 +113,7 @@ jobs:
       #     detached: true
       - name: Setup apt sources
         run: |
+          set -e
           echo "=================================="
           echo "cat /etc/apt/apt-mirrors.txt"
           cat /etc/apt/apt-mirrors.txt
@@ -91,6 +140,7 @@ jobs:
           EOF
       - name: Install toolchains
         run: |
+          set -e
           sudo dpkg --add-architecture arm64
           sudo apt-get update -qq
           sudo apt-get install -qqy -o Dpkg::Use-Pty=0 \
@@ -99,6 +149,7 @@ jobs:
             zlib1g-dev:arm64 libzstd-dev:arm64
       - name: Verify toolchains
         run: |
+          set -e
           echo "=================================="
           lsd -lL /usr/bin/gcc
           gcc --version
@@ -143,7 +194,7 @@ jobs:
                 );
             }
 
-  linux-cross-aarch64:
+  test-docker-linux-cross-aarch64:
     if: false
     runs-on: ubuntu-latest
     container:
@@ -174,6 +225,6 @@ jobs:
           rm llvm-mingw-*.tar.xz
           mv llvm-mingw* /opt/llvm-mingw
 
-          apt-get install -qqy qemu-user-static libc6-arm64-cross libstdc++6-arm64-cross > /dev/null
+          apt-get install -qqy qemu-user-binfmt libc6-arm64-cross libstdc++6-arm64-cross
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh /opt/llvm-mingw
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh /opt/llvm-mingw
