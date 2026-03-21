@@ -92,9 +92,7 @@ jobs:
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
           # Skip dynamic library dependencies that might make it harder to
@@ -102,8 +100,15 @@ jobs:
           # llvm-mingw).
           LLVM_CMAKEFLAGS="-DLLVM_ENABLE_LIBXML2=OFF -DLLDB_ENABLE_PYTHON=OFF" ./build-all.sh $(pwd)/install/llvm-mingw --stage1
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
+      - name: Run tests
+        run: |
           ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           ./run-tests.sh $(pwd)/install/llvm-mingw
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
           DISTRO=ubuntu-$(grep DISTRIB_RELEASE /etc/lsb-release | cut -f 2 -d =)-$(uname -m)
           NAME=llvm-mingw-stage1-$TAG-ucrt-$DISTRO
@@ -135,9 +140,7 @@ jobs:
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
           # Build LLVM in mostly the same way as it is going to be built in the
           # final form.
@@ -178,9 +181,7 @@ jobs:
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
           # Skip dynamic library dependencies that might make it harder to
@@ -188,8 +189,15 @@ jobs:
           # llvm-mingw).
           LLVM_CMAKEFLAGS="-DLLVM_ENABLE_LIBXML2=OFF -DLLDB_ENABLE_PYTHON=OFF" ./build-all.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --thinlto --pgo --llvm-only
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
+      - name: Run tests
+        run: |
           ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           ./run-tests.sh $(pwd)/install/llvm-mingw
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
           DISTRO=ubuntu-$(grep DISTRIB_RELEASE /etc/lsb-release | cut -f 2 -d =)-$(uname -m)
           NAME=llvm-mingw-$TAG-ucrt-$DISTRO
@@ -248,7 +256,7 @@ jobs:
           sudo apt-get install -qy libc6-arm64-cross libstdc++6-arm64-cross
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh $(pwd)/install/llvm-mingw
-      - name: Package the toolchain
+      - name: Pack toolchain
         env:
           TAG: ${{needs.prepare.outputs.TAG}}
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
@@ -286,14 +294,19 @@ jobs:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
           # Skip dynamic library dependencies that might make it harder to
           # run the binaries on other distros (and that have little use within
           # llvm-mingw).
           LLVM_CMAKEFLAGS="-DLLVM_ENABLE_LIBXML2=OFF" ./build-all.sh $(pwd)/install/llvm-mingw --disable-clang-tools-extra --disable-lldb --enable-asserts
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
+      - name: Run tests
+        run: |
           ./run-tests.sh $(pwd)/install/llvm-mingw
+      - name: Pack toolchain
+        env:
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
           tar -Jcf ../llvm-mingw-linux.tar.xz --format=ustar --numeric-owner --owner=0 --group=0 --sort=name --mtime="$BUILD_DATE" llvm-mingw
       - uses: actions/upload-artifact@v6
@@ -319,9 +332,7 @@ jobs:
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
           # Disable and python. This is available on the runners, but
@@ -329,6 +340,11 @@ jobs:
           # form.
           LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ARCH=arm64 ./build-all.sh $(pwd)/install/llvm --stage1 --with-zlib --with-zstd --llvm-only
           .github/workflows/store-version.sh install/llvm/versions.txt
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
           NAME=llvm-$TAG-macos-$(uname -m)
           mv llvm $NAME
@@ -375,9 +391,7 @@ jobs:
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
           # Disable python. This is available on the runners, but
@@ -387,8 +401,15 @@ jobs:
           # other (x86_64) architecture form.
           LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ARCH=${{matrix.arch}} ./build-all.sh $HOME/llvm $(pwd)/install/llvm-mingw --with-zlib --with-zstd --thinlto --pgo
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
+      - name: Run tests
+        run: |
           ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           ./run-tests.sh $(pwd)/install/llvm-mingw
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
           NAME=llvm-mingw-$TAG-${{matrix.crt}}-macos-${{matrix.arch}}
           mv llvm-mingw $NAME
@@ -441,9 +462,7 @@ jobs:
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           # COMPILER_LAUNCHER: ccache # TODO: support ccache
         run: |
           if [ "${{matrix.sys}}" = "mingw64" ]; then
@@ -452,8 +471,15 @@ jobs:
           ./build-all.sh $(pwd)/install/llvm-mingw --disable-clang-tools-extra --disable-lldb $ARGS
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
           ./copy-msys-dependencies.sh $(pwd)/install/llvm-mingw ${{matrix.sys}}
+      - name: Run tests
+        run: |
           ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           ./run-tests.sh $(pwd)/install/llvm-mingw
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
           NAME=llvm-mingw-$TAG-ucrt-msys2-${{matrix.sys}}
           mv llvm-mingw $NAME
@@ -517,9 +543,7 @@ jobs:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
           PYTHON_VERSION_MINGW: ${{needs.prepare.outputs.PYTHON_VERSION_MINGW}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
           sudo apt-get update -qq && sudo apt-get install -qy libltdl-dev swig autoconf-archive
@@ -529,9 +553,10 @@ jobs:
             ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zlib --with-zstd --with-busybox --thinlto --pgo
           fi
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
-      - name: Create archives
+      - name: Pack toolchain
         env:
           TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
           set -e
           cd install
