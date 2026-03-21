@@ -174,7 +174,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-x86_64-ucrt
-          max-size: 900M
+          max-size: 700M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
@@ -234,7 +234,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-ucrt
-          max-size: 900M
+          max-size: 700M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
@@ -385,7 +385,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
-          max-size: 900M
+          max-size: 1000M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
