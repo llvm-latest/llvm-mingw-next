@@ -30,7 +30,7 @@ jobs:
       BUILD_DATE_UNIX: ${{steps.get-parameters.outputs.BUILD_DATE_UNIX}}
     steps:
       - name: Download build parameters
-        uses: dawidd6/action-download-artifact@v18
+        uses: dawidd6/action-download-artifact@v19
         with:
           workflow: build.yml
           workflow_conclusion: success
@@ -55,7 +55,7 @@ jobs:
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
       - name: Download toolchain
-        uses: dawidd6/action-download-artifact@v18
+        uses: dawidd6/action-download-artifact@v19
         with:
           workflow: build.yml
           workflow_conclusion: success
@@ -120,7 +120,7 @@ jobs:
           mv llvm-mingw* /opt/llvm-mingw
           echo /opt/llvm-mingw/bin >> $GITHUB_PATH
       - name: Download profile
-        uses: dawidd6/action-download-artifact@v18
+        uses: dawidd6/action-download-artifact@v19
         with:
           workflow: build.yml
           workflow_conclusion: success
