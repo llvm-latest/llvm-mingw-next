@@ -18,8 +18,8 @@ set -e
 
 . ./logging.sh
 
-: ${SQLITE_VERSION:=3490200}
-: ${SQLITE_YEAR:=2025}
+: ${SQLITE_VERSION:=3510300}
+: ${SQLITE_YEAR:=2026}
 
 : ${LLVM_PROFILE_DATA_DIR:=/tmp/llvm-profile}
 : ${LLVM_PROFDATA_FILE:=profile.profdata}
