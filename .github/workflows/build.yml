@@ -648,8 +648,7 @@ jobs:
         run: |
           ./test-libcxx-module.sh c:/llvm-mingw
           ./run-tests.sh c:/llvm-mingw
-          # NOTE: disable lldb by default
-          # ./run-lldb-tests.sh c:/llvm-mingw
+          ./run-lldb-tests.sh c:/llvm-mingw
 
   # Run libcxx's tests with the cross-built toolchains from above.
   # (This builds its own copy of libcxx, but it should be pretty much
