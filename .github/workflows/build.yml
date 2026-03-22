@@ -86,15 +86,13 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 600M
+          max-size: 500M
           sloppiness: time_macros,include_file_mtime,include_file_ctime
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
           # Skip dynamic library dependencies that might make it harder to
@@ -102,8 +100,15 @@ jobs:
           # llvm-mingw).
           LLVM_CMAKEFLAGS="-DLLVM_ENABLE_LIBXML2=OFF -DLLDB_ENABLE_PYTHON=OFF" ./build-all.sh $(pwd)/install/llvm-mingw --stage1
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
+      - name: Run tests
+        run: |
           ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           ./run-tests.sh $(pwd)/install/llvm-mingw
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
           DISTRO=ubuntu-$(grep DISTRIB_RELEASE /etc/lsb-release | cut -f 2 -d =)-$(uname -m)
           NAME=llvm-mingw-stage1-$TAG-ucrt-$DISTRO
@@ -124,6 +129,12 @@ jobs:
       - name: Install Dependencies
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
+      - name: Setup ccache
+        uses: llvm-latest/ccache-action@main
+        with:
+          ccache-key-prefix: ccache_${{ github.job }}
+          max-size: 500M
+          sloppiness: time_macros,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
           name: linux-stage1-ucrt-x86_64-toolchain
@@ -131,17 +142,18 @@ jobs:
         run: |
           tar -Jxf llvm-mingw-*.tar.xz
           rm llvm-mingw-*.tar.xz
-          mv llvm-mingw* llvm-mingw-stage1
+          mv llvm-mingw-* llvm-mingw-stage1
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+          COMPILER_LAUNCHER: ccache
         run: |
           # Build LLVM in mostly the same way as it is going to be built in the
           # final form.
-          LLVM_CMAKEFLAGS="-DLLVM_ENABLE_LIBXML2=OFF -DLLDB_ENABLE_PYTHON=OFF" ./build-all.sh --profile $(pwd)/llvm-mingw-stage1
+          LLVM_CMAKEFLAGS="-DLLVM_ENABLE_LIBXML2=OFF -DLLDB_ENABLE_PYTHON=OFF" \
+            ./build-all.sh --profile $(pwd)/llvm-mingw-stage1 \
+            --build-instrumented-with-host-clang # for speedup building with ccache
       - uses: actions/upload-artifact@v6
         with:
           name: profile
@@ -162,7 +174,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-x86_64-ucrt
-          max-size: 900M
+          max-size: 700M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
@@ -171,16 +183,14 @@ jobs:
         run: |
           tar -Jxf llvm-mingw-*.tar.xz
           rm llvm-mingw-*.tar.xz
-          mv llvm-mingw* /opt/llvm-mingw
+          mv llvm-mingw-* /opt/llvm-mingw
       - uses: actions/download-artifact@v8
         with:
           name: profile
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
           # Skip dynamic library dependencies that might make it harder to
@@ -188,11 +198,19 @@ jobs:
           # llvm-mingw).
           LLVM_CMAKEFLAGS="-DLLVM_ENABLE_LIBXML2=OFF -DLLDB_ENABLE_PYTHON=OFF" ./build-all.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --thinlto --pgo --llvm-only
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
+      - name: Run tests
+        run: |
           ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           ./run-tests.sh $(pwd)/install/llvm-mingw
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
-          DISTRO=ubuntu-$(grep DISTRIB_RELEASE /etc/lsb-release | cut -f 2 -d =)-$(uname -m)
-          NAME=llvm-mingw-$TAG-ucrt-$DISTRO
+          # DISTRO=ubuntu-$(grep DISTRIB_RELEASE /etc/lsb-release | cut -f 2 -d =)-$(uname -m)
+          DISTRO=linux-$(uname -m)
+          NAME=llvm-mingw-ucrt-$DISTRO
           mv llvm-mingw $NAME
           tar -Jcf ../$NAME.tar.xz --format=ustar --numeric-owner --owner=0 --group=0 --sort=name --mtime="$BUILD_DATE" $NAME
       - uses: actions/upload-artifact@v6
@@ -216,7 +234,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-ucrt
-          max-size: 900M
+          max-size: 700M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
@@ -225,7 +243,7 @@ jobs:
         run: |
           tar -Jxf llvm-mingw-*.tar.xz
           rm llvm-mingw-*.tar.xz
-          mv llvm-mingw* /opt/llvm-mingw
+          mv llvm-mingw-* /opt/llvm-mingw
       - uses: actions/download-artifact@v8
         with:
           name: profile
@@ -248,14 +266,15 @@ jobs:
           sudo apt-get install -qy libc6-arm64-cross libstdc++6-arm64-cross
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh $(pwd)/install/llvm-mingw
-      - name: Package the toolchain
+      - name: Pack toolchain
         env:
           TAG: ${{needs.prepare.outputs.TAG}}
           BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
           cd install
-          DISTRO=ubuntu-$(grep DISTRIB_RELEASE /etc/lsb-release | cut -f 2 -d =)-aarch64
-          NAME=llvm-mingw-$TAG-ucrt-$DISTRO
+          # DISTRO=ubuntu-$(grep DISTRIB_RELEASE /etc/lsb-release | cut -f 2 -d =)-aarch64
+          DISTRO=linux-aarch64
+          NAME=llvm-mingw-ucrt-$DISTRO
           mv llvm-mingw $NAME
           tar -Jcf ../$NAME.tar.xz --format=ustar --numeric-owner --owner=0 --group=0 --sort=name --mtime="$BUILD_DATE" $NAME
       - uses: actions/upload-artifact@v6
@@ -286,14 +305,19 @@ jobs:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
           # Skip dynamic library dependencies that might make it harder to
           # run the binaries on other distros (and that have little use within
           # llvm-mingw).
           LLVM_CMAKEFLAGS="-DLLVM_ENABLE_LIBXML2=OFF" ./build-all.sh $(pwd)/install/llvm-mingw --disable-clang-tools-extra --disable-lldb --enable-asserts
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
+      - name: Run tests
+        run: |
           ./run-tests.sh $(pwd)/install/llvm-mingw
+      - name: Pack toolchain
+        env:
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
           tar -Jcf ../llvm-mingw-linux.tar.xz --format=ustar --numeric-owner --owner=0 --group=0 --sort=name --mtime="$BUILD_DATE" llvm-mingw
       - uses: actions/upload-artifact@v6
@@ -314,21 +338,24 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}
-          max-size: 600M
+          max-size: 500M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - name: Build
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
-          # Disable and python. This is available on the runners, but
+          # Disable python. This is available on the runners, but
           # installed with homebrew, and only available in the native (arm64)
           # form.
           LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ARCH=arm64 ./build-all.sh $(pwd)/install/llvm --stage1 --with-zlib --with-zstd --llvm-only
           .github/workflows/store-version.sh install/llvm/versions.txt
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
           NAME=llvm-$TAG-macos-$(uname -m)
           mv llvm $NAME
@@ -358,7 +385,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
-          max-size: 900M
+          max-size: 1000M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
@@ -367,7 +394,7 @@ jobs:
         run: |
           tar -Jxf llvm-*.tar.xz
           rm llvm-*.tar.xz
-          mv llvm* $HOME/llvm
+          mv llvm-* $HOME/llvm
       - uses: actions/download-artifact@v8
         with:
           name: profile
@@ -375,9 +402,7 @@ jobs:
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
           # Disable python. This is available on the runners, but
@@ -387,10 +412,17 @@ jobs:
           # other (x86_64) architecture form.
           LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ARCH=${{matrix.arch}} ./build-all.sh $HOME/llvm $(pwd)/install/llvm-mingw --with-zlib --with-zstd --thinlto --pgo
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
+      - name: Run tests
+        run: |
           ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           ./run-tests.sh $(pwd)/install/llvm-mingw
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
-          NAME=llvm-mingw-$TAG-${{matrix.crt}}-macos-${{matrix.arch}}
+          NAME=llvm-mingw-${{matrix.crt}}-macos-${{matrix.arch}}
           mv llvm-mingw $NAME
           gtar -Jcf ../$NAME.tar.xz --format=ustar --numeric-owner --owner=0 --group=0 --sort=name --mtime="$BUILD_DATE" $NAME
       - uses: actions/upload-artifact@v6
@@ -441,9 +473,7 @@ jobs:
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           # COMPILER_LAUNCHER: ccache # TODO: support ccache
         run: |
           if [ "${{matrix.sys}}" = "mingw64" ]; then
@@ -452,10 +482,17 @@ jobs:
           ./build-all.sh $(pwd)/install/llvm-mingw --disable-clang-tools-extra --disable-lldb $ARGS
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
           ./copy-msys-dependencies.sh $(pwd)/install/llvm-mingw ${{matrix.sys}}
+      - name: Run tests
+        run: |
           ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           ./run-tests.sh $(pwd)/install/llvm-mingw
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
-          NAME=llvm-mingw-$TAG-ucrt-msys2-${{matrix.sys}}
+          NAME=llvm-mingw-ucrt-msys2-${{matrix.sys}}
           mv llvm-mingw $NAME
           tar -Jcf ../$NAME.tar.xz --format=ustar --numeric-owner --owner=0 --group=0 --sort=name --mtime="$BUILD_DATE" $NAME
       - uses: actions/upload-artifact@v6
@@ -488,7 +525,7 @@ jobs:
         uses: llvm-latest/ccache-action@main
         with:
           ccache-key-prefix: ccache_${{ github.job }}-${{ matrix.arch }}-${{ matrix.crt }}
-          max-size: 900M
+          max-size: 1000M
           sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
       - uses: actions/download-artifact@v8
         with:
@@ -517,9 +554,7 @@ jobs:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
           PYTHON_VERSION_MINGW: ${{needs.prepare.outputs.PYTHON_VERSION_MINGW}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
           COMPILER_LAUNCHER: ccache
         run: |
           sudo apt-get update -qq && sudo apt-get install -qy libltdl-dev swig autoconf-archive
@@ -529,23 +564,24 @@ jobs:
             ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zlib --with-zstd --with-busybox --thinlto --pgo
           fi
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
-      - name: Create archives
+      - name: Pack toolchain
         env:
           TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
           set -e
           cd install
           # 1. Create llvm-mingew zip archive
-          NAME=llvm-mingw-$TAG-${{matrix.crt}}-windows-${{matrix.arch}}
+          echo "-- Compress llvm-mingw toolchains..."
+          NAME=llvm-mingw-${{matrix.crt}}-windows-${{matrix.arch}}
           mv llvm-mingw $NAME
-          echo "Packaging llvm-mingw toolchains..."
-          zip -9rq ../$NAME.zip $NAME
+          ROOT=$NAME
+          zip -9rq ../$NAME.zip $ROOT
 
           # 2. Create 4 llvm-mingw archives that only supports 64-bit target
           if [ "${{matrix.arch}}" = "x86_64" ] && [ "${{matrix.crt}}" = "ucrt" ]; then
-            echo "Packaging llvm-mingw tiny toolchains..."
-            ROOT=$NAME
-            PREFIX=windows-x86_64-llvm-mingw-$TAG-${{matrix.crt}}
+            echo "-- Compress llvm-mingw tiny toolchains..."
+            PREFIX=windows-x86_64-llvm-mingw-${{matrix.crt}}
             # COMPRESS="7z a -t7z -mx=6 -snl" # follow symlinks
             COMPRESS="7z a -t7z -mx=6" # don't follow symlinks
             FILES=" \

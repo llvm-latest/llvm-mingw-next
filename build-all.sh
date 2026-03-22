@@ -92,6 +92,9 @@ while [ $# -gt 0 ]; do
         LLVM_ARGS="$LLVM_ARGS --disable-lldb --disable-clang-tools-extra"
         NO_LLDB=1
         ;;
+    --build-instrumented-with-host-clang)
+        BUILD_INSTRUMENTED_WITH_HOST_CLANG=1
+        ;;
     --profile|--profile=*)
         case "$1" in
         --profile=*)
@@ -171,7 +174,10 @@ if [ -n "$FULL_PGO" ]; then
 fi
 
 if [ -n "$PROFILE" ]; then
-    export PATH=$PREFIX/bin:$PATH
+    # Use host Clang with ccache to accelerate the llvm instrumented build
+    if [ -z "$BUILD_INSTRUMENTED_WITH_HOST_CLANG" ]; then
+        export PATH=$PREFIX/bin:$PATH
+    fi
     STAGE1_PREFIX=$PREFIX
     PREFIX=/tmp/dummy-prefix
 elif [ -n "$PGO" ]; then

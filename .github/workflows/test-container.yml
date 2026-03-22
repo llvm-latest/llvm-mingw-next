@@ -7,6 +7,10 @@ on:
       - ".github/workflows/test-container.yml"
   workflow_dispatch:
     inputs:
+      enable_macos_stage1:
+        description: 'Enable macos stage1 build'
+        type: boolean
+        default: false
       enable_linux_cross_windows:
         description: 'Enable linux cross windows build'
         type: boolean
@@ -24,6 +28,32 @@ env:
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
+  test-macos-stage1:
+    if: github.event_name == 'workflow_dispatch' && inputs.enable_macos_stage1
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
+      - name: Setup ccache
+        uses: llvm-latest/ccache-action@main
+        with:
+          ccache-key-prefix: ccache_macos-latest
+          max-size: 500M
+          sloppiness: time_macros,file_stat_matches,include_file_mtime,include_file_ctime
+      - name: Setup Debug Tools
+        run: |
+          brew install bat lsd fd btop
+      - name: Build
+        env:
+          COMPILER_LAUNCHER: ccache
+        run: |
+          LLVM_CMAKEFLAGS="-DLLDB_ENABLE_PYTHON=OFF" ARCH=arm64 \
+            ./build-all.sh $(pwd)/install/llvm \
+            --stage1 --with-zlib --with-zstd --llvm-only
+
   test-linux-cross-windows:
     if: github.event_name == 'workflow_dispatch' && inputs.enable_linux_cross_windows
     runs-on: ubuntu-latest

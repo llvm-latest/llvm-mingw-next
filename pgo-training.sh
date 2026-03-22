@@ -18,8 +18,8 @@ set -e
 
 . ./logging.sh
 
-: ${SQLITE_VERSION:=3490200}
-: ${SQLITE_YEAR:=2025}
+: ${SQLITE_VERSION:=3510300}
+: ${SQLITE_YEAR:=2026}
 
 : ${LLVM_PROFILE_DATA_DIR:=/tmp/llvm-profile}
 : ${LLVM_PROFDATA_FILE:=profile.profdata}
@@ -28,8 +28,8 @@ if [ $# -lt 2 ]; then
     echo $0 build stage1
     exit 1
 fi
-PREFIX="$1"
-STAGE1="$2"
+PREFIX="$1" # llvm-project/llvm/build-instrumented
+STAGE1="$2" # stage1 clang root
 PREFIX="$(cd "$PREFIX" && pwd)"
 
 MAKE=make

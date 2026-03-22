@@ -60,7 +60,10 @@ fi
 
 mkdir -p "$PREFIX"
 PREFIX="$(cd "$PREFIX" && pwd)"
-export PATH="$PREFIX/bin:$PATH"
+# Use host Clang with ccache to accelerate the stage1 compiler-rt build
+if [ -z "$NATIVE" ]; then
+    export PATH="$PREFIX/bin:$PATH"
+fi
 
 : ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64 arm64ec}}
 
@@ -112,9 +115,6 @@ if [ -n "$NATIVE" ]; then
         -DCMAKE_C_COMPILER=clang \
         -DCMAKE_CXX_COMPILER=clang++ \
         -DLLVM_CONFIG_PATH="" \
-        -DCMAKE_FIND_ROOT_PATH=$PREFIX \
-        -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-        -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
         -DCOMPILER_RT_USE_LIBCXX=OFF \
         $CMAKEFLAGS \
         $SRC_DIR
@@ -144,8 +144,8 @@ for arch in $ARCHS; do
         -DCMAKE_SYSTEM_NAME=Windows \
         -DCMAKE_AR="$PREFIX/bin/llvm-ar" \
         -DCMAKE_RANLIB="$PREFIX/bin/llvm-ranlib" \
-        -DCMAKE_C_COMPILER_WORKS=1 \
-        -DCMAKE_CXX_COMPILER_WORKS=1 \
+        -DCMAKE_C_COMPILER_WORKS=TRUE \
+        -DCMAKE_CXX_COMPILER_WORKS=TRUE \
         -DCMAKE_C_COMPILER_TARGET=$arch-w64-windows-gnu \
         -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
         -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \

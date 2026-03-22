@@ -6,10 +6,10 @@ on:
         description: 'Ref to extract from'
         type: string
         default: 'master'
-      upload:
-        description: 'Upload the artifacts'
-        type: boolean
-        default: false
+      tag:
+        description: 'Tag to upload to'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -30,7 +30,7 @@ jobs:
       BUILD_DATE_UNIX: ${{steps.get-parameters.outputs.BUILD_DATE_UNIX}}
     steps:
       - name: Download build parameters
-        uses: dawidd6/action-download-artifact@v18
+        uses: dawidd6/action-download-artifact@v19
         with:
           workflow: build.yml
           workflow_conclusion: success
@@ -55,7 +55,7 @@ jobs:
         run: ./install-dependencies.sh
       - uses: rui314/setup-mold@v1
       - name: Download toolchain
-        uses: dawidd6/action-download-artifact@v18
+        uses: dawidd6/action-download-artifact@v19
         with:
           workflow: build.yml
           workflow_conclusion: success
@@ -72,15 +72,19 @@ jobs:
         env:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
-          TAG: ${{needs.prepare.outputs.TAG}}
           SOURCE_DATE_EPOCH: ${{needs.prepare.outputs.COMMIT_DATE_UNIX}}
-          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
         run: |
           ./build-all.sh $(pwd)/install/llvm-mingw --no-tools --wipe-runtimes --with-default-msvcrt=msvcrt
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
-          DISTRO=ubuntu-$(grep DISTRIB_RELEASE /etc/lsb-release | cut -f 2 -d =)-$(uname -m)
-          NAME=llvm-mingw-$TAG-msvcrt-$DISTRO
+          # DISTRO=ubuntu-$(grep DISTRIB_RELEASE /etc/lsb-release | cut -f 2 -d =)-$(uname -m)
+          DISTRO=linux-$(uname -m)
+          NAME=llvm-mingw-msvcrt-$DISTRO
           mv llvm-mingw $NAME
           tar -Jcf ../$NAME.tar.xz --format=ustar --numeric-owner --owner=0 --group=0 --sort=name --mtime="$BUILD_DATE" $NAME
       - uses: actions/upload-artifact@v6
@@ -116,7 +120,7 @@ jobs:
           mv llvm-mingw* /opt/llvm-mingw
           echo /opt/llvm-mingw/bin >> $GITHUB_PATH
       - name: Download profile
-        uses: dawidd6/action-download-artifact@v18
+        uses: dawidd6/action-download-artifact@v19
         with:
           workflow: build.yml
           workflow_conclusion: success
@@ -138,15 +142,21 @@ jobs:
           LLVM_VERSION: ${{needs.prepare.outputs.LLVM_VERSION}}
           MINGW_W64_VERSION: ${{needs.prepare.outputs.MINGW_W64_VERSION}}
           PYTHON_VERSION_MINGW: ${{needs.prepare.outputs.PYTHON_VERSION_MINGW}}
-          TAG: ${{needs.prepare.outputs.TAG}}
         run: |
           sudo apt-get update -qq && sudo apt-get install -y libltdl-dev swig autoconf-archive
-          ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zstd --with-busybox --thinlto --pgo
+          ./build-cross-tools.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw ${{matrix.arch}} --with-python --with-zlib --with-zstd --with-busybox --thinlto --pgo
           .github/workflows/store-version.sh install/llvm-mingw/versions.txt
+      - name: Run tests
+        run: |
           ./test-libcxx-module.sh $(pwd)/install/llvm-mingw
           ./run-tests.sh $(pwd)/install/llvm-mingw
+      - name: Pack toolchain
+        env:
+          TAG: ${{needs.prepare.outputs.TAG}}
+          BUILD_DATE: ${{needs.prepare.outputs.BUILD_DATE}}
+        run: |
           cd install
-          NAME=llvm-mingw-$TAG-${{matrix.crt}}-${{matrix.arch}}
+          NAME=llvm-mingw-${{matrix.crt}}-${{matrix.arch}}
           mv llvm-mingw $NAME
           zip -9rq ../$NAME.zip $NAME
       - name: Save cache
@@ -202,7 +212,7 @@ jobs:
           ./run-lldb-tests.sh /llvm-mingw
 
   upload:
-    if: ${{github.event_name == 'workflow_dispatch' && inputs.upload}}
+    if: ${{github.event_name == 'workflow_dispatch' && inputs.tag != ''}}
     permissions:
       contents: write
     needs: [linux-msvcrt, linux-cross-windows, test-toolchain, prepare]
@@ -217,6 +227,5 @@ jobs:
       - name: Upload binaries
         env:
           GITHUB_TOKEN: ${{github.token}}
-          TAG: ${{needs.prepare.outputs.TAG}}
         run: |
-          gh release upload $TAG *.tar.xz *.zip --clobber -R ${{github.repository}}
+          gh release upload ${{inputs.tag}} *.tar.xz *.zip --clobber -R ${{github.repository}}
