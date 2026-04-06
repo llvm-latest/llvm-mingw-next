@@ -91,6 +91,17 @@ if [ -n "$COMPILER_LAUNCHER" ]; then
     CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER_LAUNCHER=$COMPILER_LAUNCHER"
     CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER_LAUNCHER=$COMPILER_LAUNCHER"
 fi
+cat<<EOF > is-ucrt.c
+#include <corecrt.h>
+#if !defined(_UCRT)
+#error not ucrt
+#endif
+EOF
+ANY_ARCH=$(echo $ARCHS | awk '{print $1}')
+if $ANY_ARCH-w64-mingw32-gcc$TOOLEXT -E is-ucrt.c > /dev/null 2>&1; then
+    IS_UCRT=1
+fi
+rm -f is-ucrt.c
 
 cd llvm-project/compiler-rt
 
@@ -171,19 +182,26 @@ for arch in $ARCHS; do
     cmake --install . --prefix "$INSTALL_PREFIX"
     mkdir -p "$PREFIX/$arch-w64-mingw32/bin"
     if [ -n "$SANITIZERS" ]; then
-        case $arch in
-        aarch64)
-            # asan doesn't work on aarch64 or armv7; make this clear by omitting
-            # the installed files altogether.
-            rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*aarch64*
-            ;;
-        armv7)
-            rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*arm*
-            ;;
-        *)
-            mv "$INSTALL_PREFIX/lib/windows/"*.dll "$PREFIX/$arch-w64-mingw32/bin"
-            ;;
-        esac
+        if [ -z "$IS_UCRT" ]; then
+            # For msvcrt builds, remove the asan files; asan doesn't work
+            # properly on top of msvcrt, only on top of UCRT. Make this clear
+            # by omitting the installed files altogether.
+            rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*
+        else
+            case $arch in
+            aarch64)
+                # asan doesn't work on aarch64 or armv7; make this clear by omitting
+                # the installed files altogether.
+                rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*aarch64*
+                ;;
+            armv7)
+                rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*arm*
+                ;;
+            *)
+                mv "$INSTALL_PREFIX/lib/windows/"*.dll "$PREFIX/$arch-w64-mingw32/bin"
+                ;;
+            esac
+        fi
     fi
     cd ..
 done
