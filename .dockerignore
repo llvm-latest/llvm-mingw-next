@@ -1,4 +1,5 @@
 .git
+busybox-w32
 llvm-project
 mingw-w64
 lldb-mi
@@ -6,6 +7,8 @@ make-*
 libffi
 cpython*
 python-native
+zlib-ng
+zstd
 **/*.exe
 **/*.dll
 **/*.lib
