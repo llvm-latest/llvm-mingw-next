@@ -66,18 +66,28 @@ else
     esac
 fi
 
+ARM64X_FLAGS=""
+for arch in $ARCHS; do
+    case $arch in
+    arm64ec) ARM64X_FLAGS="-marm64x" ;;
+    esac
+done
+
 for arch in $ARCHS; do
     CMAKEFLAGS=""
     if [ -n "$COMPILER_LAUNCHER" ]; then
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER_LAUNCHER=$COMPILER_LAUNCHER"
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER_LAUNCHER=$COMPILER_LAUNCHER"
     fi
+
     case $arch in
     x86_64)
         CMAKEFLAGS="$CMAKEFLAGS -DLIBOMP_ASMFLAGS=-m64"
         ;;
+    aarch64)
+        FLAGS="$ARM64X_FLAGS"
+        ;;
     arm64ec)
-        # Not yet supported
         continue
         ;;
     esac
@@ -100,8 +110,9 @@ for arch in $ARCHS; do
         -DCMAKE_RANLIB="$PREFIX/bin/llvm-ranlib" \
         -DLLVM_ENABLE_RUNTIMES="openmp" \
         -DLIBOMP_ENABLE_SHARED=TRUE \
-        -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS" \
-        -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS" \
+        -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS $FLAGS" \
+        -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS $FLAGS" \
+        -DCMAKE_SHARED_LINKER_FLAGS="$FLAGS" \
         $CMAKEFLAGS \
         ..
     cmake --build . ${CORES:+-j${CORES}}

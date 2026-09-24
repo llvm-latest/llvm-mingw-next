@@ -9,9 +9,9 @@ on:
       - '.github/workflows/release.yml'
       - '.github/workflows/test-container.yml'
   pull_request:
-  workflow_dispatch:
   # schedule:
   #   - cron: '0 0 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -30,7 +30,7 @@ jobs:
   # assertions enabled, has passed some amount of tests.
   prepare:
     if: (github.event_name != 'schedule') || (github.repository == 'mstorsjo/llvm-mingw')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       LLVM_VERSION: ${{steps.get-versions.outputs.LLVM_VERSION}}
       MINGW_W64_VERSION: ${{steps.get-versions.outputs.MINGW_W64_VERSION}}
@@ -46,7 +46,7 @@ jobs:
       - name: Select build tag
         id: get-tag
         run: |
-          if ${{github.event_name == 'schedule'}}; then
+          if ${{github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'}}; then
               TAG=nightly
           else
               TAG=$(TZ=UTC date +%Y%m%d)
@@ -59,12 +59,12 @@ jobs:
           cat $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT >> parameters.txt
       - name: Check latest version
-        if: github.event_name == 'schedule'
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         id: get-versions
         run: |
           echo LLVM_VERSION=$(git ls-remote https://github.com/llvm-latest/llvm-p2996.git | grep 'refs/heads/p2996$' | awk '{print $1}') >> $GITHUB_OUTPUT
           echo MINGW_W64_VERSION=$(git ls-remote https://github.com/mingw-w64/mingw-w64.git | grep 'refs/heads/master$' | awk '{print $1}') >> $GITHUB_OUTPUT
-          echo PYTHON_VERSION_MINGW=$(git ls-remote https://github.com/msys2-contrib/cpython-mingw.git | grep 'refs/heads/mingw-v3.13.11$' | awk '{print $1}') >> $GITHUB_OUTPUT
+          echo PYTHON_VERSION_MINGW=$(git ls-remote https://github.com/msys2-contrib/cpython-mingw.git | grep 'refs/heads/mingw-v3.14.5$' | awk '{print $1}') >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT >> parameters.txt
       - uses: actions/upload-artifact@v6
@@ -76,7 +76,7 @@ jobs:
 
   linux-stage1:
     needs: [prepare]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v6
       - name: Install Dependencies
@@ -123,7 +123,7 @@ jobs:
 
   linux-profile:
     needs: [prepare, linux-stage1]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v6
       - name: Install Dependencies
@@ -152,8 +152,8 @@ jobs:
           # Build LLVM in mostly the same way as it is going to be built in the
           # final form.
           LLVM_CMAKEFLAGS="-DLLVM_ENABLE_LIBXML2=OFF -DLLDB_ENABLE_PYTHON=OFF" \
-            ./build-all.sh --profile $(pwd)/llvm-mingw-stage1 \
-            --build-instrumented-with-host-clang # for speedup building with ccache
+            ./build-all.sh --profile $(pwd)/llvm-mingw-stage1 # \
+            # --build-instrumented-with-host-clang # for speedup building with ccache
       - uses: actions/upload-artifact@v6
         with:
           name: profile
@@ -164,7 +164,7 @@ jobs:
   # Build a cross compiler for Linux, targeting Windows.
   linux:
     needs: [prepare, linux-stage1, linux-profile]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v6
       - name: Install Dependencies
@@ -224,7 +224,7 @@ jobs:
   # libraries that were built in the 'linux-stage1' step above.
   linux-cross-aarch64:
     needs: [linux-stage1, linux-profile, prepare]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v6
       - name: Install Dependencies
@@ -292,9 +292,9 @@ jobs:
   # to better catch such bugs early. This makes the first-stage toolchain built
   # here in scheduled builds somewhat slower.
   linux-asserts:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [prepare]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v6
       - name: Install Dependencies
@@ -329,7 +329,7 @@ jobs:
 
   macos-stage1:
     needs: [prepare]
-    runs-on: macos-latest
+    runs-on: xcode-27 # macos-latest
     steps:
       # - name: Setup mold
       #   run: brew install mold
@@ -370,7 +370,7 @@ jobs:
   # Build a cross compiler for macOS, targeting Windows.
   macos:
     needs: [prepare, macos-stage1, linux-profile]
-    runs-on: macos-latest
+    runs-on: xcode-27 # macos-latest
     strategy:
       fail-fast: false
       matrix:
@@ -507,7 +507,7 @@ jobs:
   # architectures). The binaries built here match actual releases quite closely.
   linux-cross-windows:
     needs: [linux-stage1, linux-profile, prepare]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -757,7 +757,7 @@ jobs:
   # This also forces testing the bundled python executables.
   test-openmp:
     # Only running these tests in scheduled builds.
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [linux-cross-windows, prepare]
     strategy:
       fail-fast: false
@@ -766,11 +766,12 @@ jobs:
           - { arch: i686, asmflag: '' }
           - { arch: x86_64, asmflag: -m64 }
           - { arch: aarch64 }
+          - { arch: arm64ec }
     runs-on: ${{startsWith(matrix.arch, 'a') && 'windows-11-arm' || 'windows-latest'}}
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: windows-ucrt-${{matrix.arch}}-toolchain
+          name: windows-ucrt-${{matrix.arch == 'arm64ec' && 'aarch64' || matrix.arch}}-toolchain
       - name: Unpack toolchain
         run: |
           Expand-Archive llvm-mingw-*.zip -DestinationPath .
@@ -808,8 +809,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release `
             -DPython3_EXECUTABLE="$Env:PYTHON_EXE" `
             -DLLVM_BINARY_DIR="$Env:TOOLS" `
-            -DCMAKE_C_COMPILER=clang `
-            -DCMAKE_CXX_COMPILER=clang++ `
+            -DCMAKE_C_COMPILER=${{matrix.arch}}-w64-mingw32-clang `
+            -DCMAKE_CXX_COMPILER=${{matrix.arch}}-w64-mingw32-clang++ `
             -DCMAKE_ASM_MASM_COMPILER=llvm-ml `
             -DLLVM_ENABLE_RUNTIMES="openmp" `
             -DLIBOMP_ASMFLAGS=${{matrix.asmflag}} `
@@ -821,7 +822,7 @@ jobs:
   # also forces testing the bundled python executables.
   test-compiler-rt:
     # Only running these tests in scheduled builds.
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [linux-cross-windows, prepare]
     strategy:
       fail-fast: false
@@ -898,9 +899,9 @@ jobs:
   # enabled, to catch code generation bugs that might trigger asserts, to
   # find such regressions early.
   linux-test-cross-build-ffmpeg:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [linux-asserts]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -943,7 +944,7 @@ jobs:
   # compiler itself, but that only show up at runtime. This is only done
   # for scheduled builds.
   test-ffmpeg:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [linux-cross-windows]
     runs-on: windows-latest
     defaults:
@@ -990,11 +991,11 @@ jobs:
           make -j$(nproc) fate
 
   upload-nightly:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
     needs: [linux, linux-cross-aarch64, macos, linux-cross-windows, test-toolchain, linux-test-cross-build-ffmpeg, test-ffmpeg]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v8

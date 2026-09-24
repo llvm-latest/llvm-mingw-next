@@ -16,11 +16,9 @@
 
 set -e
 
-. ./logging.sh
-
-: ${LIBFFI_VERSION:=v3.5.2}
-: ${PYTHON_VERSION:=v3.13.11}
-: ${PYTHON_VERSION_MINGW:=1f577554dcf3d231206f2c5c908bc0a2ef3dce8e}
+: ${LIBFFI_VERSION:=master}
+: ${PYTHON_VERSION:=v3.14.7}
+: ${PYTHON_VERSION_MINGW:=56cdb4b201d96f26cdcb1f7c2b93086298f7df11}
 
 unset HOST
 

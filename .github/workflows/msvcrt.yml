@@ -19,7 +19,7 @@ env:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       LLVM_VERSION: ${{steps.get-parameters.outputs.LLVM_VERSION}}
       MINGW_W64_VERSION: ${{steps.get-parameters.outputs.MINGW_W64_VERSION}}
@@ -46,7 +46,7 @@ jobs:
   # Build a new toolchain with a different CRT choice.
   linux-msvcrt:
     needs: [prepare]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v6
         with:
@@ -96,7 +96,7 @@ jobs:
 
   linux-cross-windows:
     needs: [linux-msvcrt, prepare]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -216,7 +216,7 @@ jobs:
     permissions:
       contents: write
     needs: [linux-msvcrt, linux-cross-windows, test-toolchain, prepare]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v8

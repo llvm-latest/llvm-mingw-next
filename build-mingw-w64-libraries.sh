@@ -57,10 +57,27 @@ if command -v gmake >/dev/null; then
     MAKE=gmake
 fi
 
+ARM64X_FLAGS=""
+for arch in $ARCHS; do
+    case $arch in
+    arm64ec) ARM64X_FLAGS="-marm64x" ;;
+    esac
+done
+
 cd mingw-w64/mingw-w64-libraries
 for lib in winpthreads winstorecompat; do
     cd $lib
+    FLAGS=""
     for arch in $ARCHS; do
+        case $arch in
+        aarch64)
+            FLAGS="$ARM64X_FLAGS"
+            ;;
+        arm64ec)
+            continue
+            ;;
+        esac
+
         [ -z "$CLEAN" ] || rm -rf build-$arch
         if [ -z "$COMPILER_LAUNCHER" ]; then
             export CC=$arch-w64-mingw32-gcc
@@ -75,8 +92,9 @@ for lib in winpthreads winstorecompat; do
         arch_prefix="$PREFIX/$arch-w64-mingw32"
         ../configure --host=$arch-w64-mingw32 --prefix="$arch_prefix" --libdir="$arch_prefix/lib" \
             --enable-silent-rules \
-            CFLAGS="$USE_CFLAGS" \
-            CXXFLAGS="$USE_CFLAGS"
+            CFLAGS="$USE_CFLAGS $FLAGS" \
+            CXXFLAGS="$USE_CFLAGS $FLAGS" \
+            LDFLAGS="$FLAGS"
         $MAKE -j$CORES
         $MAKE install
         cd ..

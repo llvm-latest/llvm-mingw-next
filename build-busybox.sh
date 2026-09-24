@@ -18,7 +18,7 @@ set -e
 
 . ./logging.sh
 
-: ${BUSYBOX_VERSION:=1f493261d16be3d984fe8a689f5113dafb6eaaa7}
+: ${BUSYBOX_VERSION:=master}
 
 BUILDDIR=build
 

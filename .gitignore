@@ -4,6 +4,7 @@
 /llvm-project
 /mingw-w64
 /lldb-mi
+/make
 /make-*
 /libffi
 /cpython*

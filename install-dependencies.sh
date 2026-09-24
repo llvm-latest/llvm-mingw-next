@@ -22,11 +22,11 @@ if [ "$CI" = "true" ]; then
     if [ -n "$WITH_ARM64" ]; then
         sudo dpkg --add-architecture arm64
         sudo tee /etc/apt/sources.list > /dev/null <<EOF
-deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
-deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
-deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
-deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
-deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
+deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
+deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
+deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
+deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
+deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
 deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel main restricted universe multiverse
 deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-backports main restricted universe multiverse
 deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-proposed main restricted universe multiverse
@@ -35,11 +35,11 @@ deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-updates main restr
 EOF
     else
         sudo tee /etc/apt/sources.list > /dev/null <<EOF
-deb https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
-deb https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
-deb https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
-deb https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
-deb https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
+deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
+deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
+deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
+deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
+deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
 EOF
     fi
 fi
@@ -51,6 +51,17 @@ sudo apt-get install -y -o Dpkg::Use-Pty=0 apt-fast
 
 if [ -f /.dockerenv ] || grep -q 'docker\|lxc' /proc/1/cgroup 2>/dev/null; then
     sudo apt-get install -y -o Dpkg::Use-Pty=0 software-properties-common
+fi
+
+# Fix zlib1g-dev:arm64 install issue
+if [ -n "$WITH_ARM64" ]; then
+sudo apt-get install -y -o Dpkg::Use-Pty=0 aptitude
+sudo aptitude install -y \
+    -o Aptitude::ProblemResolver::SolutionCost='10*downgrade, 100*new-package, 1000*remove, 10000*cancel' \
+    -o Aptitude::ProblemResolver::Keep-All-Solutions=true \
+    -o Aptitude::Auto-Install=true \
+    --without-recommends \
+    libc6-dev:arm64 linux-libc-dev:arm64
 fi
 
 # Install Essential Tools

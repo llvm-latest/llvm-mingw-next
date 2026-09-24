@@ -142,12 +142,12 @@ jobs:
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./run-tests.sh $(pwd)/install/llvm-mingw
 
   install-latest-toolchains:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-      #   with:
-      #     detached: true
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
       - name: Setup apt sources
         run: |
           set -e
@@ -164,11 +164,11 @@ jobs:
           sudo rm -rf /etc/apt/apt-mirrors.txt
           sudo rm -rf /etc/apt/sources.list.d
           sudo tee /etc/apt/sources.list > /dev/null <<EOF
-          deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
-          deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
-          deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
-          deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
-          deb [arch=amd64] https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
+          deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel main restricted universe multiverse
+          deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-backports main restricted universe multiverse
+          deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-proposed main restricted universe multiverse
+          deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-security main restricted universe multiverse
+          deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
           deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel main restricted universe multiverse
           deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-backports main restricted universe multiverse
           deb [arch=arm64] https://ports.ubuntu.com/ubuntu-ports/ devel-proposed main restricted universe multiverse
@@ -180,9 +180,18 @@ jobs:
           set -e
           sudo dpkg --add-architecture arm64
           sudo apt-get update -qq
-          sudo apt-get install -qqy -o Dpkg::Use-Pty=0 \
-            lsd \
-            gcc g++ clang \
+
+          # Fix zlib1g-dev:arm64 install issue
+          sudo apt-get install -y -o Dpkg::Use-Pty=0 aptitude
+          sudo aptitude install -y \
+            -o Aptitude::ProblemResolver::SolutionCost='10*downgrade, 100*new-package, 1000*remove, 10000*cancel' \
+            -o Aptitude::ProblemResolver::Keep-All-Solutions=true \
+            -o Aptitude::Auto-Install=true \
+            --without-recommends \
+            libc6-dev:arm64 linux-libc-dev:arm64
+
+          sudo apt-get install -y -o Dpkg::Use-Pty=0 \
+            lsd gcc g++ clang \
             zlib1g-dev:arm64 libzstd-dev:arm64
       - name: Verify toolchains
         run: |

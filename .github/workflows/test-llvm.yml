@@ -62,8 +62,6 @@ jobs:
           del llvm-mingw-*.zip
           mv llvm-mingw-* c:\llvm-mingw
           echo "c:\llvm-mingw\bin" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
-          echo "c:\llvm-mingw\python\bin" | Out-File -FilePath $Env:GITHUB_PATH -Encoding utf8 -Append
-          echo "PYTHON_EXE=c:/llvm-mingw/python/bin/python3.exe" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
       - uses: actions/checkout@v6
       - name: Checkout llvm-project
         env:
@@ -86,7 +84,6 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Windows `
             -DLLVM_TARGETS_TO_BUILD="AArch64;X86" `
             -DLLVM_ENABLE_PROJECTS="clang;lld;clang-tools-extra" `
-            -DLLVM_WINDOWS_PREFER_FORWARD_SLASH=OFF `
             -DCMAKE_C_COMPILER=clang `
             -DCMAKE_CXX_COMPILER=clang++ `
             -DCMAKE_CXX_FLAGS="-D__USE_MINGW_ANSI_STDIO=${{startsWith(matrix.arch, 'a') && '0' || '1'}}" `

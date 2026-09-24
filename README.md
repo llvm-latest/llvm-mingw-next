@@ -16,6 +16,19 @@ __Add some missing features and several improvements.__
 - CI: Using the latest toolchains for building
 - CI: Support for speedup building using `ccache`
 
+- CI: 手动触发 `Build` 可选更新 `LLVM` 到最新提交（前提所有构建和测试全部通过）
+- CI: Support for caching `msys2` builds
+- CI: caching more build targets (tests)
+
+- 静态库 开启LTO构建，同时支持lto和非lto链接
+
+- TODO: 支持构建 LLDB 缺少的特性
+-- Enable editline support in LLDB: FALSE
+-- Enable curses support in LLDB: FALSE
+-- Enable LZMA compression support in LLDB: FALSE
+-- Enable Libxml 2 support in LLDB: FALSE
+-- Enable Tree-sitter syntax highlighting: FALSE
+
 LLVM MinGW
 ==========
 
