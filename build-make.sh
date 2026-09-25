@@ -20,10 +20,15 @@ set -e
 
 unset HOST
 
+: ${MAKE_VERSION:=4.4.1}
+
 while [ $# -gt 0 ]; do
     case "$1" in
     --host=*)
         HOST="${1#*=}"
+        ;;
+    --use-git)
+        USE_GIT=1
         ;;
     *)
         PREFIX="$1"
@@ -43,6 +48,40 @@ PREFIX="$(cd "$PREFIX" && pwd)"
 : ${CORES:=$(sysctl -n hw.ncpu 2>/dev/null)}
 : ${CORES:=4}
 
+if [ -z "$USE_GIT" ]; then
+    download() {
+        if command -v curl >/dev/null; then
+            curl --retry 3 --retry-delay 5 --retry-all-errors -fSLO "$1"
+        else
+            wget -t 3 -w 5 "$1"
+        fi
+    }
+
+    if [ ! -d make-$MAKE_VERSION ]; then
+        if [ ! -e make-$MAKE_VERSION.tar.gz ]; then
+            echo "Downloading make-$MAKE_VERSION.tar.gz ..."
+            download https://ftpmirror.gnu.org/gnu/make/make-$MAKE_VERSION.tar.gz
+
+            if [ $? -ne 0 ]; then
+                echo "Error: Download make-$MAKE_VERSION.tar.gz failed."
+                exit 1
+            fi
+        fi
+
+        echo "Extracting make-$MAKE_VERSION.tar.gz ..."
+        tar -zxf make-$MAKE_VERSION.tar.gz
+    fi
+
+    cd make-$MAKE_VERSION
+else # use git
+    if [ ! -d make ]; then
+        git clone --depth 1 https://github.com/mirror/make.git
+    fi
+
+    cd make
+    ./bootstrap
+fi
+
 if [ -n "$HOST" ]; then
     case $HOST in
     *-mingw32)
@@ -56,13 +95,6 @@ else
         ;;
     esac
 fi
-
-if [ ! -d make ]; then
-    git clone --depth 1 https://github.com/mirror/make.git
-fi
-
-cd make
-./bootstrap
 
 if [ -n "$HOST" ]; then
     CONFIGFLAGS="$CONFIGFLAGS --host=$HOST"
