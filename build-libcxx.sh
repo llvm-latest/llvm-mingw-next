@@ -80,31 +80,17 @@ if [ -n "$COMPILER_LAUNCHER" ]; then
 fi
 
 for arch in $ARCHS; do
-    case $arch in
-    arm64ec) ARM64X_FLAGS="-marm64x" ;;
-    esac
-done
-
-for arch in $ARCHS; do
     [ -z "$CLEAN" ] || rm -rf build-$arch
     mkdir -p build-$arch
     cd build-$arch
     [ -n "$NO_RECONF" ] || rm -rf CMake*
 
     EXTRA_CFLAGS=""
-    EXTRA_LDFLAGS=""
     case $arch in
     i686|x86_64)
         # Force using the mingw stdio functions, for correct long double
         # printing.
         EXTRA_CFLAGS="-D__USE_MINGW_ANSI_STDIO=1"
-        ;;
-    aarch64)
-        EXTRA_CFLAGS="$ARM64X_FLAGS"
-        EXTRA_LDFLAGS="$ARM64X_FLAGS"
-        ;;
-    arm64ec)
-        continue
         ;;
     esac
 
