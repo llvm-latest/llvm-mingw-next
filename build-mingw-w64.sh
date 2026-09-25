@@ -116,6 +116,9 @@ fi
 
 cd mingw-w64-crt
 for arch in $ARCHS; do
+    [ -z "$CLEAN" ] || rm -rf build-$arch
+    mkdir -p build-$arch
+    cd build-$arch
     if [ -z "$COMPILER_LAUNCHER" ]; then
         export CC=$arch-w64-mingw32-gcc
         export CXX=$arch-w64-mingw32-g++
