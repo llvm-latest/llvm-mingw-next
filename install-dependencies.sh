@@ -42,6 +42,8 @@ deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-security main restri
 deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-updates main restricted universe multiverse
 EOF
     fi
+
+    sudo apt-mark hold libssl-dev
 fi
 
 # Install apt-fast
