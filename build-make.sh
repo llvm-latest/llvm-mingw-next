@@ -73,6 +73,7 @@ fi
 mkdir -p build$CROSS_NAME
 cd build$CROSS_NAME
 
+CFLAGS="-std=gnu17 -O2"
 LDFLAGS="-flto -ffunction-sections -fdata-sections -fno-unwind-tables"
 if [ "$(uname)" = "Darwin" ]; then
     LDFLAGS="$LDFLAGS -Wl,-dead_strip -Wl,-dead_strip_dylibs"
@@ -90,7 +91,7 @@ fi
 ../configure --prefix="$PREFIX" $CONFIGFLAGS \
     --program-prefix=mingw32- \
     --enable-job-server \
-    CFLAGS="-O2" \
+    CFLAGS="$CFLAGS" \
     LDFLAGS="$LDFLAGS"
 
 make -j$CORES
