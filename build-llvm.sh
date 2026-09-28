@@ -18,7 +18,7 @@ set -e
 
 . ./logging.sh
 
-: ${LLVM_REPOSITORY:=https://github.com/brevzin/llvm-project.git}
+: ${LLVM_REPOSITORY:=https://github.com/llvm-latest/llvm-next.git}
 : ${LLVM_VERSION:=compiler-explorer/barry}
 ASSERTS=OFF
 unset HOST

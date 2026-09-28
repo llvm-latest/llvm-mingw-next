@@ -3,7 +3,14 @@ This Fork
 
 __Add some missing features and several improvements.__
 
-- This project is built based on the [llvm-latest/llvm-p2996](https://github.com/llvm-latest/llvm-p2996)
+- This project is built based on the [llvm-latest/llvm-next](https://github.com/llvm-latest/llvm-next)
+  - C++ 26
+    - [P2996](https://wg21.link/P2996): `Reflection`
+  - C++ 29
+    - [P4380](https://wg21.link/P4380): `Token Sequence Injection`
+    - [P3951](https://wg21.link/P3951): `String Interpolation with Template Strings`
+    - [P2806](https://wg21.link/P2806): `do expressions`
+
 - Support for building `LLVM`/`Clang`/`LLDB`/`Clang-Tidy` plugins
   - Add `llvm`/`llvm-c`/`clang`/`clang-c`/`lldb`/`clang-tidy` headers
   - Add `libclang` dynamic library
