@@ -75,7 +75,8 @@ if [ -z "$USE_GIT" ]; then
     cd make-$MAKE_VERSION
 else # use git
     if [ ! -d make ]; then
-        git clone --depth 1 https://github.com/mirror/make.git
+        git clone --depth 1 https://github.com/x1ab/gnumake.git
+        # git clone --depth 1 https://github.com/mirror/make.git
     fi
 
     cd make
