@@ -190,7 +190,7 @@ if [ -n "$RELEASE_BUILD" ]; then
         remove_with_log zstd
     fi
 else
-    rm -rf clang clang-c clang-tidy lld llvm llvm-c lldb
+    rm -rf clang clang-c clang-tidy clangd lld llvm llvm-c lldb
 fi
 cd ..
 cd lib
