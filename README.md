@@ -5,11 +5,13 @@ __Add some missing features and several improvements.__
 
 - This project is built based on the [llvm-latest/llvm-next](https://github.com/llvm-latest/llvm-next)
   - C++ 26
-    - [P2996](https://wg21.link/P2996): `Reflection`
+    - [P2996](https://wg21.link/P2996): Reflection
+    - [P3394](https://wg21.link/P3394): Annotations for Reflection
   - C++ 29
-    - [P4380](https://wg21.link/P4380): `Token Sequence Injection`
-    - [P3951](https://wg21.link/P3951): `String Interpolation with Template Strings`
-    - [P2806](https://wg21.link/P2806): `do expressions`
+    - [P4380](https://wg21.link/P4380): Token Sequence Injection
+    - [P4364](https://wg21.link/P4364): Emitting messages at compile time with `std::format`
+    - [P3951](https://wg21.link/P3951): String Interpolation with Template Strings
+    - [P2806](https://wg21.link/P2806): `do` expressions
 
 - Support for building `LLVM`/`Clang`/`LLDB`/`Clang-Tidy` plugins
   - Add `llvm`/`llvm-c`/`clang`/`clang-c`/`lldb`/`clang-tidy` headers
