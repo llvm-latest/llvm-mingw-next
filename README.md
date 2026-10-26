@@ -13,8 +13,8 @@ __Add some missing features and several improvements.__
     - [P3951](https://wg21.link/P3951): String Interpolation with Template Strings
     - [P2806](https://wg21.link/P2806): `do` expressions
 
-- Support for building `LLVM`/`Clang`/`LLDB`/`Clang-Tidy` plugins
-  - Add `llvm`/`llvm-c`/`clang`/`clang-c`/`lldb`/`clang-tidy` headers
+- Support for building `Clang`/`Clang-Tidy`/`clangd`/`LLVM`/`LLDB` dynamic plugins
+  - Add `clang`/`clang-c`/`clang-tidy`/`clangd`/`llvm`/`llvm-c`/`lldb` headers
   - Add `libclang` dynamic library
 - Support for building single-architecture macOS binaries
 - Use `mold` linker by default on Linux

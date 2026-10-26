@@ -17,7 +17,7 @@ done
 
 if [ "$CI" = "true" ]; then
     sudo rm -rf /etc/apt/apt-mirrors.txt
-    sudo rm -rf /etc/apt/sources.list.d
+    sudo rm -rf /etc/apt/sources.list.d/*
 
     if [ -n "$WITH_ARM64" ]; then
         sudo dpkg --add-architecture arm64
@@ -43,13 +43,20 @@ deb [arch=amd64v3] https://archive.ubuntu.com/ubuntu/ devel-updates main restric
 EOF
     fi
 
+    # LLVM Debian/Ubuntu nightly packages
+    sudo tee /etc/apt/sources.list.d/llvm.list > /dev/null <<EOF
+deb https://apt.llvm.org/resolute/ llvm-toolchain-resolute main
+deb http://apt.llvm.org/resolute/ llvm-toolchain-resolute-23 main
+EOF
+    wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+
     sudo apt-mark hold libssl-dev
 fi
 
 # Install apt-fast
 sudo add-apt-repository ppa:apt-fast/stable -y
 sudo apt-get install -y -o Dpkg::Use-Pty=0 apt-fast
-# sudo apt-get update -qq
+sudo apt-get update -qq
 
 if [ -f /.dockerenv ] || grep -q 'docker\|lxc' /proc/1/cgroup 2>/dev/null; then
     sudo apt-get install -y -o Dpkg::Use-Pty=0 software-properties-common
